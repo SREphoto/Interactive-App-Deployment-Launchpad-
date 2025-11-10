@@ -1,0 +1,6 @@
+{
+  "name": "Interactive App Deployment Launchpad v0.9.9",
+  "description": "An interactive guide detailing the steps from prototype to production for web applications, focusing on security, cloud services (GCP/Firebase), and best practices.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

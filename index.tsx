@@ -1243,6 +1243,12 @@ function renderLaunchpad() {
                 </section>
             </div>
             <aside class="launchpad-sidebar">
+                <section id="roadmap-minimap-section" class="launchpad-section sidebar-section" aria-labelledby="roadmap-minimap-heading">
+                    <h3 id="roadmap-minimap-heading">Roadmap Minimap</h3>
+                    <div id="roadmap-minimap-content">
+                        ${renderRoadmapMinimap()}
+                    </div>
+                </section>
                 <section id="decisions-made-section" class="launchpad-section sidebar-section" aria-labelledby="decisions-made-heading">
                     <h3 id="decisions-made-heading">Decisions Made</h3>
                     <div id="decisions-made-content">
@@ -1627,6 +1633,103 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
             </div>
         </div>
     `;
+}
+
+function renderMinimapNode(step: RoadmapStep, level: number = 0): string {
+    let extraClass = '';
+    if (step.completed) extraClass += ' completed';
+    if (step.isArchived) extraClass += ' archived';
+
+    const detailedCard = findCardGlobally(step.relatedCardId);
+    if (detailedCard && detailedCard.type !== 'decision' && detailedCard.decisionContextId) {
+        const parentDecision = findCardGlobally(detailedCard.decisionContextId);
+        if (parentDecision && parentDecision.completed && selectedOptionForDecision[parentDecision.id] !== step.relatedCardId) {
+             extraClass += ' archived';
+        }
+    }
+
+    const firstActiveCard = detailedCards.length > 0 ? detailedCards[0] : null;
+    if (firstActiveCard && firstActiveCard.id === step.relatedCardId) {
+        extraClass += ' current-step';
+    }
+
+    return `
+        <div class="minimap-node type-${step.type} ${extraClass}" data-scroll-to="card-${step.relatedCardId}" style="--level: ${level};" role="button" tabindex="0" aria-label="Scroll to ${step.title}">
+            <span class="minimap-node-indicator"></span>
+            <span class="minimap-node-title">${step.title}</span>
+        </div>
+    `;
+}
+
+function renderRoadmapMinimap(): string {
+    if (roadmapSteps.length === 0) {
+        return '<p class="empty-state-message">No roadmap to display.</p>';
+    }
+
+    let html = '<div class="minimap-tree">';
+    const processedStepIds = new Set<string>();
+
+    const allCardsMap = new Map<string, DetailedCardData>();
+    [...detailedCards, ...completedDetailedCards, ...archivedCards].forEach(c => allCardsMap.set(c.id, c));
+
+    const isVisible = (card: DetailedCardData | undefined): boolean => {
+        if (!card) return false;
+        if (card.activatedByOptionId) {
+            const activatingOptionCard = allCardsMap.get(card.activatedByOptionId);
+            const decisionContextId = activatingOptionCard?.decisionContextId;
+            if (decisionContextId && selectedOptionForDecision[decisionContextId] && selectedOptionForDecision[decisionContextId] !== card.activatedByOptionId) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    function buildLevel(steps: RoadmapStep[], level: number) {
+        steps.forEach(step => {
+            if (processedStepIds.has(step.id) || step.isArchived) return;
+
+            const currentCard = allCardsMap.get(step.relatedCardId);
+            if (!isVisible(currentCard)) return;
+
+            processedStepIds.add(step.id);
+            html += renderMinimapNode(step, level);
+
+            if (step.type === 'decision') {
+                const optionSteps = roadmapSteps.filter(rs => {
+                    const detailCard = allCardsMap.get(rs.relatedCardId);
+                    return detailCard && (detailCard.type === 'option-best' || detailCard.type === 'option-other') && detailCard.decisionContextId === step.relatedCardId;
+                });
+
+                if (optionSteps.length > 0) {
+                    html += '<div class="minimap-branch">';
+                    optionSteps.forEach(optStep => {
+                        const subsequentSteps = roadmapSteps.filter(s => {
+                            const card = allCardsMap.get(s.relatedCardId);
+                            return card?.activatedByOptionId === optStep.relatedCardId;
+                        });
+                        if (subsequentSteps.length > 0) {
+                            html += '<div class="minimap-branch-option">';
+                            buildLevel([optStep, ...subsequentSteps], level + 1);
+                            html += '</div>';
+                        } else {
+                            buildLevel([optStep], level + 1);
+                        }
+                    });
+                    html += '</div>';
+                }
+            }
+        });
+    }
+
+    const topLevelSteps = roadmapSteps.filter(step => {
+        const card = allCardsMap.get(step.relatedCardId);
+        return card && !card.activatedByOptionId;
+    });
+
+    buildLevel(topLevelSteps, 0);
+
+    html += '</div>';
+    return html;
 }
 
 function renderDecisionsMadeSidebar(): string {
@@ -2174,11 +2277,18 @@ function attachAllEventListeners() {
 }
 
 function attachCardEventListeners() {
-    // Roadmap mini-cards for scrolling
-    const miniCards = document.querySelectorAll('.mini-card');
-    miniCards.forEach(card => card.addEventListener('click', () => {
-        const targetId = card.getAttribute('data-scroll-to');
-        if (targetId) scrollToElement(targetId);
+    // Roadmap mini-cards and minimap nodes for scrolling
+    const scrollNodes = document.querySelectorAll('.mini-card, .minimap-node');
+    scrollNodes.forEach(node => node.addEventListener('click', () => {
+        const targetId = node.getAttribute('data-scroll-to');
+        if (targetId) {
+            // Check if the click is on a minimap node to provide visual feedback
+            if (node.classList.contains('minimap-node')) {
+                document.querySelectorAll('.minimap-node').forEach(n => n.classList.remove('selected'));
+                node.classList.add('selected');
+            }
+            scrollToElement(targetId);
+        }
     }));
 
     // Detailed cards actions

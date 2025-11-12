@@ -1134,6 +1134,117 @@ main#app-container {
 .decision-made-item .chosen-option { font-size: 0.95em; color: var(--color-text-secondary); padding-left: 5px; }
 .decision-made-item .chosen-option::before { content: "↳ "; color: var(--color-success); font-weight: bold; margin-right: 3px; }
 
+/* Roadmap Minimap Styles */
+.minimap-tree {
+    position: relative;
+    font-size: 0.9em;
+}
+.minimap-node {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    padding-left: calc(var(--level, 0) * 20px);
+    position: relative;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.minimap-node:hover {
+    background-color: var(--color-surface-2);
+}
+
+.minimap-node-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--card-color-step);
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+.minimap-node-title {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.minimap-node.completed .minimap-node-title {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+.minimap-node.archived { display: none; } /* Hide archived from minimap */
+
+/* Color coding for minimap nodes */
+.minimap-node.type-decision .minimap-node-indicator { border-color: var(--card-color-decision); }
+.minimap-node.type-option-best .minimap-node-indicator { border-color: var(--card-color-option-best); }
+.minimap-node.type-option-other .minimap-node-indicator { border-color: var(--card-color-option-other); }
+.minimap-node.type-warning .minimap-node-indicator { border-color: var(--card-color-warning); }
+.minimap-node.completed .minimap-node-indicator { background-color: var(--card-color-completed); border-color: var(--card-color-completed); }
+
+/* Highlighting the current step */
+.minimap-node.current-step .minimap-node-title {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+.minimap-node.current-step .minimap-node-indicator {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 8px var(--shadow-color-strong);
+}
+.minimap-node.current-step.type-decision .minimap-node-indicator {
+    animation: pulse 1.5s infinite;
+}
+
+.minimap-node.selected {
+    background-color: var(--color-surface-2) !important;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.minimap-branch {
+    padding-left: 15px;
+    position: relative;
+}
+/* Connecting lines for minimap */
+.minimap-branch::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: -5px;
+    bottom: 5px;
+    width: 1px;
+    background-color: var(--line-color);
+}
+.minimap-node:not(.type-option-best):not(.type-option-other)::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--level, 0) * 20px - 10px);
+    top: -5px;
+    height: 100%;
+    width: 1px;
+    background-color: var(--line-color);
+}
+.minimap-node:first-child::before {
+    top: 50%;
+}
+.minimap-node:last-child::before {
+    height: 50%;
+}
+.minimap-node::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--level, 0) * 20px - 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1px;
+    width: 10px;
+    background-color: var(--line-color);
+}
+
+
 .color-legend-list { list-style: none; padding: 0; margin: 0; }
 .legend-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.9em; }
 .legend-swatch { width: 18px; height: 18px; border-radius: 4px; margin-right: 12px; border: 2px solid; }

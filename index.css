@@ -56,6 +56,14 @@ header {
     z-index: 100;
 }
 
+.logo {
+    margin-right: 20px;
+}
+
+.logo img {
+    height: 30px;
+}
+
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
@@ -127,6 +135,25 @@ main#app-container {
     padding: 0 20px;
 }
 
+.welcome-container {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-info));
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--color-text-primary);
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.welcome-content h1 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+}
+
+.welcome-content p {
+    font-size: 1.2em;
+    margin: 0;
+}
+
 /* AI Launchpad General Styles */
 .launchpad-section {
     background-color: var(--color-surface-1);
@@ -195,6 +222,39 @@ main#app-container {
     font-style: italic;
     background-color: var(--color-surface-1);
     border-radius: 8px;
+}
+
+#launchpad-search-container {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+#launchpad-search-input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    font-size: 1em;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+#launchpad-search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-color);
+}
+
+#launchpad-search-container::before {
+    content: '🔍';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-secondary);
+    font-size: 1.2em;
 }
 
 
@@ -392,6 +452,7 @@ main#app-container {
     margin-bottom: 20px;
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
     overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .guide-card[open] { box-shadow: 0 5px 25px rgba(0,0,0,0.3); border-color: var(--color-primary); }
@@ -411,12 +472,12 @@ main#app-container {
 
 .card-toggle-icon { font-size: 0.8em; margin-left: auto; padding-left: 10px; color: var(--color-text-secondary); transition: transform 0.4s ease-in-out; }
 .guide-card summary::-webkit-details-marker,
-#tools-container .guide-card summary::-webkit-details-marker { display: none; }
+#tools-container .guide-card details summary::-webkit-details-marker { display: none; }
 .guide-card summary,
-#tools-container .guide-card summary { list-style: none; }
+#tools-container .guide-card details summary { list-style: none; }
 
 .guide-card summary::before,
-#tools-container .guide-card summary::before {
+#tools-container .guide-card details summary::before {
     content: '▶';
     font-size: 0.8em;
     margin-right: 12px;

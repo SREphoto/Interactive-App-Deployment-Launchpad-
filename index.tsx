@@ -852,6 +852,7 @@ let completedDetailedCards: DetailedCardData[] = [];
 let archivedCards: DetailedCardData[] = [];
 let selectedOptionForDecision: { [decisionCardId: string]: string | null } = {};
 let guideSearchQuery = '';
+let launchpadSearchQuery = '';
 let toolStates: ToolState = {};
 let sandboxState: SandboxState = {
     html: `<h1>Hello, Sandbox!</h1>\n<p>Edit the code above and click "Run" to see your changes.</p>`,
@@ -1150,6 +1151,12 @@ function loadStateFromLocalStorage() {
 
 function renderLaunchpad() {
     appContainer.innerHTML = `
+        <div class="welcome-container">
+            <div class="welcome-content">
+                <h1>Welcome to the AI Studio Launch Assistant</h1>
+                <p>Your comprehensive guide to launching and deploying AI-powered applications.</p>
+            </div>
+        </div>
         <div class="launchpad-layout">
             <div class="launchpad-main-content">
                 <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
@@ -1212,22 +1219,26 @@ function renderLaunchpad() {
 
                 <section class="launchpad-section" id="detailed-steps-section" aria-labelledby="detailed-steps-heading" style="display: ${!isClarifying && (detailedCards.length > 0 || completedDetailedCards.length > 0 || archivedCards.length > 0) ? 'block' : 'none'};">
                     <h2 id="detailed-steps-heading">${isClarifying ? '4.' : '3.'} Detailed Steps & Guidance</h2>
+                    <div id="launchpad-search-container">
+                        <label for="launchpad-search-input" class="sr-only">Search Steps</label>
+                        <input type="search" id="launchpad-search-input" placeholder="Search steps..." value="${launchpadSearchQuery}">
+                    </div>
                     <div id="detailed-cards-container">
-                        ${detailedCards.length > 0 ? detailedCards.map(card => renderDetailedCard(card, 'active')).join('') : '<p class="empty-state-message">No active steps. Generate a plan or check completed/archived steps.</p>'}
+                        ${ renderFilteredCards(detailedCards, 'active') }
                     </div>
                 </section>
 
                 <section class="launchpad-section" id="completed-roadmap-section" aria-labelledby="completed-roadmap-heading" style="display: ${!isClarifying && completedDetailedCards.length > 0 ? 'block' : 'none'};">
                     <h2 id="completed-roadmap-heading">Completed Steps</h2>
                     <div id="completed-cards-container">
-                        ${completedDetailedCards.map(card => renderDetailedCard(card, 'completed')).join('')}
+                        ${ renderFilteredCards(completedDetailedCards, 'completed') }
                     </div>
                 </section>
 
                 <section class="launchpad-section" id="archived-items-section" aria-labelledby="archived-items-heading" style="display: ${!isClarifying && archivedCards.length > 0 ? 'block' : 'none'};">
                     <h2 id="archived-items-heading">Archived Items</h2>
                     <div id="archived-cards-container">
-                        ${archivedCards.map(card => renderDetailedCard(card, 'archived')).join('')}
+                        ${ renderFilteredCards(archivedCards, 'archived') }
                     </div>
                 </section>
             </div>
@@ -1275,6 +1286,23 @@ function renderLaunchpad() {
      const projectCodeTextarea = document.getElementById('project-code') as HTMLTextAreaElement;
     if (projectCodeTextarea && currentProjectCode) {
         projectCodeTextarea.value = currentProjectCode;
+    }
+}
+
+function renderFilteredCards(cards: DetailedCardData[], context: 'active' | 'completed' | 'archived'): string {
+    const query = launchpadSearchQuery.toLowerCase().trim();
+    const filteredCards = query === ''
+        ? cards
+        : cards.filter(card =>
+            card.title.toLowerCase().includes(query) ||
+            stripHtml(card.content).toLowerCase().includes(query)
+        );
+
+    if (filteredCards.length > 0) {
+        return filteredCards.map(card => renderDetailedCard(card, context)).join('');
+    } else {
+        const contextMessage = context === 'active' ? 'active steps' : `${context} items`;
+        return `<p class="empty-state-message">No ${contextMessage} found for your search.</p>`;
     }
 }
 
@@ -1990,6 +2018,12 @@ function attachAllEventListeners() {
         const downloadBtn = document.getElementById('download-plan-btn');
         downloadBtn?.addEventListener('click', handlePlanDownload);
         
+        const launchpadSearchInput = document.getElementById('launchpad-search-input');
+        launchpadSearchInput?.addEventListener('input', (e) => {
+            launchpadSearchQuery = (e.target as HTMLInputElement).value;
+            renderLaunchpad();
+        });
+
         attachCardEventListeners();
 
     } else if (currentView === 'guide') {

@@ -56,6 +56,14 @@ header {
     z-index: 100;
 }
 
+.logo {
+    margin-right: 20px;
+}
+
+.logo img {
+    height: 30px;
+}
+
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
@@ -127,6 +135,25 @@ main#app-container {
     padding: 0 20px;
 }
 
+.welcome-container {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-info));
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--color-text-primary);
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.welcome-content h1 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+}
+
+.welcome-content p {
+    font-size: 1.2em;
+    margin: 0;
+}
+
 /* AI Launchpad General Styles */
 .launchpad-section {
     background-color: var(--color-surface-1);
@@ -195,6 +222,39 @@ main#app-container {
     font-style: italic;
     background-color: var(--color-surface-1);
     border-radius: 8px;
+}
+
+#launchpad-search-container {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+#launchpad-search-input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    font-size: 1em;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+#launchpad-search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-color);
+}
+
+#launchpad-search-container::before {
+    content: '🔍';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-secondary);
+    font-size: 1.2em;
 }
 
 
@@ -392,6 +452,7 @@ main#app-container {
     margin-bottom: 20px;
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
     overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .guide-card[open] { box-shadow: 0 5px 25px rgba(0,0,0,0.3); border-color: var(--color-primary); }
@@ -411,12 +472,12 @@ main#app-container {
 
 .card-toggle-icon { font-size: 0.8em; margin-left: auto; padding-left: 10px; color: var(--color-text-secondary); transition: transform 0.4s ease-in-out; }
 .guide-card summary::-webkit-details-marker,
-#tools-container .guide-card summary::-webkit-details-marker { display: none; }
+#tools-container .guide-card details summary::-webkit-details-marker { display: none; }
 .guide-card summary,
-#tools-container .guide-card summary { list-style: none; }
+#tools-container .guide-card details summary { list-style: none; }
 
 .guide-card summary::before,
-#tools-container .guide-card summary::before {
+#tools-container .guide-card details summary::before {
     content: '▶';
     font-size: 0.8em;
     margin-right: 12px;
@@ -1072,6 +1133,117 @@ main#app-container {
 .decision-made-item .decision-title { display: block; font-weight: 600; color: var(--color-warning); margin-bottom: 6px; font-size: 1em; }
 .decision-made-item .chosen-option { font-size: 0.95em; color: var(--color-text-secondary); padding-left: 5px; }
 .decision-made-item .chosen-option::before { content: "↳ "; color: var(--color-success); font-weight: bold; margin-right: 3px; }
+
+/* Roadmap Minimap Styles */
+.minimap-tree {
+    position: relative;
+    font-size: 0.9em;
+}
+.minimap-node {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    padding-left: calc(var(--level, 0) * 20px);
+    position: relative;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.minimap-node:hover {
+    background-color: var(--color-surface-2);
+}
+
+.minimap-node-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--card-color-step);
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+.minimap-node-title {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.minimap-node.completed .minimap-node-title {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+.minimap-node.archived { display: none; } /* Hide archived from minimap */
+
+/* Color coding for minimap nodes */
+.minimap-node.type-decision .minimap-node-indicator { border-color: var(--card-color-decision); }
+.minimap-node.type-option-best .minimap-node-indicator { border-color: var(--card-color-option-best); }
+.minimap-node.type-option-other .minimap-node-indicator { border-color: var(--card-color-option-other); }
+.minimap-node.type-warning .minimap-node-indicator { border-color: var(--card-color-warning); }
+.minimap-node.completed .minimap-node-indicator { background-color: var(--card-color-completed); border-color: var(--card-color-completed); }
+
+/* Highlighting the current step */
+.minimap-node.current-step .minimap-node-title {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+.minimap-node.current-step .minimap-node-indicator {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 8px var(--shadow-color-strong);
+}
+.minimap-node.current-step.type-decision .minimap-node-indicator {
+    animation: pulse 1.5s infinite;
+}
+
+.minimap-node.selected {
+    background-color: var(--color-surface-2) !important;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.minimap-branch {
+    padding-left: 15px;
+    position: relative;
+}
+/* Connecting lines for minimap */
+.minimap-branch::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: -5px;
+    bottom: 5px;
+    width: 1px;
+    background-color: var(--line-color);
+}
+.minimap-node:not(.type-option-best):not(.type-option-other)::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--level, 0) * 20px - 10px);
+    top: -5px;
+    height: 100%;
+    width: 1px;
+    background-color: var(--line-color);
+}
+.minimap-node:first-child::before {
+    top: 50%;
+}
+.minimap-node:last-child::before {
+    height: 50%;
+}
+.minimap-node::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--level, 0) * 20px - 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1px;
+    width: 10px;
+    background-color: var(--line-color);
+}
+
 
 .color-legend-list { list-style: none; padding: 0; margin: 0; }
 .legend-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.9em; }

@@ -3,7 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { marked } from "marked";
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import {
+    GUIDE_VERSION,
+    GUIDE_LAST_UPDATED,
+    LOCAL_STORAGE_KEY,
+    DEFAULT_CHAT_CHIPS,
+    toolData,
+    staticGuideData
+} from './src/data';
+import {
+    CardType,
+    AppView,
+    ProjectInputMode,
+    SubStep,
+    ChatMessage,
+    DetailedCardData,
+    SandboxState,
+    RoadmapStep,
+    ApplicationState,
+    ToolState,
+    StaticGuideCardData,
+    SandboxCode
+} from './src/types';
+import { sanitizeHtml, stripHtml, generateUniqueId } from './src/utils';
+import {
+    initAI,
+    callGeminiForPlan,
+    callGeminiForClarification,
+    callGeminiForChat,
+    callGeminiForBreakdown,
+    callGeminiForCloudPrompt,
+    callGeminiForTool,
+    callGeminiForGitHubTool,
+    callGeminiForSandbox
+} from './src/api';
+
+declare var hljs: any;
 
 // --- Data for the original Deployment Guide ---
 const GUIDE_VERSION = "1.3.0";
@@ -21,16 +56,16 @@ const DEFAULT_CHAT_CHIPS = [
 declare var mermaid: any;
 
 interface StaticGuideCardData {
-  title: string;
-  content: string; // HTML content
-  children?: StaticGuideCardData[];
-  chatHistory?: ChatMessage[];
-  isChatLoading?: boolean;
-  chatError?: string | null;
-  currentChatQuery?: string;
-  suggestedStep?: { title: string; type: CardType; content: string; } | null;
-  isTool?: boolean;
-  chatChips?: string[];
+    title: string;
+    content: string; // HTML content
+    children?: StaticGuideCardData[];
+    chatHistory?: ChatMessage[];
+    isChatLoading?: boolean;
+    chatError?: string | null;
+    currentChatQuery?: string;
+    suggestedStep?: { title: string; type: CardType; content: string; } | null;
+    isTool?: boolean;
+    chatChips?: string[];
 }
 
 const toolData: StaticGuideCardData[] = [
@@ -115,9 +150,9 @@ const toolData: StaticGuideCardData[] = [
 ];
 
 let staticGuideData: StaticGuideCardData[] = [
-  {
-    title: "Critical Security Checklist",
-    content: `
+    {
+        title: "Critical Security Checklist",
+        content: `
       <p>This checklist consolidates the most critical security actions. Ensure you can check every box before deploying a public-facing application.</p>
       <ul class="security-checklist">
         <li>
@@ -151,15 +186,15 @@ let staticGuideData: StaticGuideCardData[] = [
         </li>
       </ul>
     `
-  },
-  {
-    title: "Lifecycle & Strategy",
-    content: `<p>Guides on project planning, collaboration, and adapting to new requirements.</p>`,
-    children: [
-        {
-            title: "Git Branching Strategy Guide",
-            isTool: false,
-            content: `
+    },
+    {
+        title: "Lifecycle & Strategy",
+        content: `<p>Guides on project planning, collaboration, and adapting to new requirements.</p>`,
+        children: [
+            {
+                title: "Git Branching Strategy Guide",
+                isTool: false,
+                content: `
                 <p>Choosing the right Git branching strategy is crucial for team collaboration and release management. Here's an overview of popular models.</p>
                 <h4>GitHub Flow</h4>
                 <p>A lightweight, branch-based workflow. The <code>main</code> branch is always deployable. All development is done on feature branches, which are created from <code>main</code>. When a feature is complete, it's reviewed via a Pull Request and merged back into <code>main</code> to be deployed.</p>
@@ -180,10 +215,10 @@ let staticGuideData: StaticGuideCardData[] = [
                     <li><strong>Cons:</strong> Requires a mature testing culture and robust feature flag system. Not ideal for beginners.</li>
                 </ul>
             `
-        },
-        {
-            title: "Reassessment & Plan Adjustment",
-            content: `
+            },
+            {
+                title: "Reassessment & Plan Adjustment",
+                content: `
                 <p>Plans change. If you've encountered a roadblock, discovered a new requirement, or realized an earlier decision wasn't right for your project, this tool can help.</p>
                 <p>Describe your situation in the <span class="highlight-chat">chat below</span>. The AI has access to your current plan (your project description, decisions made, and completed steps) and can provide contextual advice. It can help you figure out how to pivot and can even suggest new, custom steps to add to your roadmap.</p>
                 <p><strong>Example prompts:</strong></p>
@@ -193,17 +228,17 @@ let staticGuideData: StaticGuideCardData[] = [
                     <li>"The 'Firebase Authentication' option won't work for my use case. I need to integrate with a custom OAuth provider instead."</li>
                 </ul>
             `,
-             chatChips: [
-                "I chose Firestore, but now I realize I need a relational database. What should I do?",
-                "My app needs to support image uploads, which we didn't plan for. What steps should I add?",
-                "The 'Firebase Authentication' option won't work for my use case. How do I integrate a custom OAuth provider?"
-            ]
-          },
-    ]
-  },
-  {
-    title: "Introduction & Critical Security Warning",
-    content: `
+                chatChips: [
+                    "I chose Firestore, but now I realize I need a relational database. What should I do?",
+                    "My app needs to support image uploads, which we didn't plan for. What steps should I add?",
+                    "The 'Firebase Authentication' option won't work for my use case. How do I integrate a custom OAuth provider?"
+                ]
+            },
+        ]
+    },
+    {
+        title: "Introduction & Critical Security Warning",
+        content: `
       <h2>Purpose of This Guide</h2>
       <p>This guide provides a structured approach to developing and deploying a web application, particularly when interacting with powerful APIs like Google's Gemini. It covers essential steps from initial setup to going live, with a strong emphasis on security and best practices.</p>
       <h2><strong class="critical-warning">CRITICAL: NEVER Expose API Keys in Client-Side Code (Frontend)</strong></h2>
@@ -222,10 +257,10 @@ let staticGuideData: StaticGuideCardData[] = [
       <p>This guide will show you how to set up such a backend.</p>
       <p class="critical-warning"><strong>Note for this AI Launchpad Tool:</strong> If using the Gemini API directly from the client-side as implemented here, ensure <code>process.env.API_KEY</code> is managed securely and is not exposed in a publicly deployed bundle. For public production apps, a backend proxy is the standard secure method.</p>
     `
-  },
-  {
-    title: "Google Cloud Project Setup",
-    content: `
+    },
+    {
+        title: "Google Cloud Project Setup",
+        content: `
       <h2>1. Create or Select a Google Cloud Project</h2>
       <ul>
         <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>.</li>
@@ -249,10 +284,10 @@ let staticGuideData: StaticGuideCardData[] = [
       </ul>
       <p>Ensure billing is enabled for your project, as many of these services are paid (though they often have free tiers).</p>
     `
-  },
-  {
-    title: "Secure API Key Management (Secret Manager)",
-    content: `
+    },
+    {
+        title: "Secure API Key Management (Secret Manager)",
+        content: `
       <h2>1. Obtain Your Gemini API Key</h2>
       <p>If you haven't already, get your Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</p>
       <h2>2. Store the API Key in Google Cloud Secret Manager</h2>
@@ -275,10 +310,10 @@ let staticGuideData: StaticGuideCardData[] = [
       </ul>
       <p>You will grant your backend service (Cloud Function) permission to access this secret, rather than embedding the key in code.</p>
     `
-  },
+    },
     {
-    title: "Backend Setup - Cloud Function Proxy",
-    content: `
+        title: "Backend Setup - Cloud Function Proxy",
+        content: `
       <h2>Why a Backend Proxy?</h2>
       <p>As emphasized, your API key must not be in the frontend. A backend Cloud Function acts as a secure intermediary:</p>
       <ol>
@@ -409,10 +444,10 @@ exports.handleGeminiRequest = app;
         <li>Once deployed, go to the "<strong>Trigger</strong>" tab of your function. Copy the <strong>Trigger URL</strong>. This is what your frontend will call.</li>
       </ol>
     `
-  },
-  {
-    title: "CORS Configuration for Your Backend",
-    content: `
+    },
+    {
+        title: "CORS Configuration for Your Backend",
+        content: `
       <h2>What is CORS?</h2>
       <p>Cross-Origin Resource Sharing is a security feature that restricts web pages from making requests to a different domain than the one that served the page. If your frontend (e.g., <code>your-app.firebaseapp.com</code>) and your backend Cloud Function (<code>...cloudfunctions.net</code>) are on different domains, you must explicitly configure CORS on the backend to allow requests from your frontend.</p>
       <h2>How to Configure CORS in Your Node.js Cloud Function</h2>
@@ -443,10 +478,10 @@ app.use(cors(corsOptions));
 </code></pre>
       <p>After updating your <code>index.js</code> with the correct CORS configuration, you must redeploy your Cloud Function for the changes to take effect.</p>
     `
-  },
-  {
-    title: "Frontend Adaptation - Calling Your Backend",
-    content: `
+    },
+    {
+        title: "Frontend Adaptation - Calling Your Backend",
+        content: `
       <p>Now, modify your frontend JavaScript (<code>index.tsx</code> or similar) to call your new Cloud Function instead of trying to use the Gemini API SDK directly.</p>
       <p><strong>Remove any direct Gemini SDK initialization and API key handling from your frontend code.</strong></p>
       <pre><code class="language-typescript">// Example: in your index.tsx or a similar frontend file
@@ -538,10 +573,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
       </ul>
       <p>Make sure your UI can catch these thrown errors and display a friendly message to the user, like "Sorry, something went wrong. Please try again."</p>
     `
-  },
-  {
-    title: "Frontend Build Process",
-    content: `
+    },
+    {
+        title: "Frontend Build Process",
+        content: `
       <p>For a production web app, your TypeScript (<code>.tsx</code>) code needs to be compiled and bundled into plain JavaScript, HTML, and CSS that browsers can understand.</p>
       <h3>Popular Build Tools:</h3>
       <ul>
@@ -572,10 +607,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
         </li>
       </ol>
     `
-  },
-  {
-    title: "Hosting Your Frontend",
-    content: `
+    },
+    {
+        title: "Hosting Your Frontend",
+        content: `
       <p>Once your frontend is built into a set of static files (e.g., in a <code>dist</code> or <code>build</code> directory), you need to host it on a public server.</p>
       <h2>Option A: Firebase Hosting (Recommended)</h2>
       <p>Firebase Hosting is an excellent choice for static and dynamic web apps, offering a global CDN, free SSL certificates, and easy setup.</p>
@@ -594,10 +629,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
       <h2>Option B: Google Cloud Storage (GCS) + Load Balancer</h2>
       <p>This is a more advanced but powerful option. It involves creating a GCS bucket to hold your static assets, making the bucket public, and setting up a Global HTTP(S) Load Balancer to point to it and provide an SSL certificate.</p>
     `
-  },
-  {
-    title: "Authentication (Conceptual Overview)",
-    content: `
+    },
+    {
+        title: "Authentication (Conceptual Overview)",
+        content: `
       <p>If your application needs to identify users, save personal data, or restrict access to certain features, you need an authentication system.</p>
       <h2>Options:</h2>
       <ul>
@@ -612,10 +647,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
         <li><strong>Backend:</strong> Your Cloud Function receives the request, extracts the ID Token, and uses a library (like the Firebase Admin SDK) to verify its signature and expiration. If valid, it processes the request. If not, it returns a 401 Unauthorized error.</li>
       </ol>
     `
-  },
-  {
-    title: "Storage / Database (Conceptual Overview)",
-    content: `
+    },
+    {
+        title: "Storage / Database (Conceptual Overview)",
+        content: `
       <p>Most non-trivial applications need to store data, such as user profiles, content, or application state.</p>
       <h2>Options (GCP/Firebase):</h2>
       <ul>
@@ -638,10 +673,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
       </ul>
       <p><strong>Security Model:</strong> All database operations should be controlled by your secure backend or through strong security rules (like Firestore Security Rules) to prevent unauthorized data access from the client-side.</p>
     `
-  },
-  {
-    title: "Web Application Testing Strategies",
-    content: `
+    },
+    {
+        title: "Web Application Testing Strategies",
+        content: `
       <h2>Why Test Your Application?</h2>
       <p>Testing is a critical part of the software development lifecycle. It ensures your application is reliable, functions as expected, and provides a good user experience. A solid testing strategy catches bugs early, simplifies maintenance, and gives you confidence when deploying new features.</p>
       
@@ -677,10 +712,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
         <li><strong>Recommended Tools:</strong> <a href="https://developer.chrome.com/docs/lighthouse/overview" target="_blank" rel="noopener noreferrer">Google Lighthouse</a> (built into Chrome DevTools), <a href="https://www.webpagetest.org/" target="_blank" rel="noopener noreferrer">WebPageTest</a>.</li>
       </ul>
     `
-  },
-  {
-    title: "CI/CD - Continuous Integration/Deployment (Conceptual)",
-    content: `
+    },
+    {
+        title: "CI/CD - Continuous Integration/Deployment (Conceptual)",
+        content: `
       <p>CI/CD is the practice of automating your development and deployment workflows to release software faster and more reliably.</p>
       <h3>What is it?</h3>
       <ul>
@@ -700,10 +735,10 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
         <li><strong>GitLab CI/CD, Jenkins:</strong> Other powerful and popular CI/CD tools.</li>
       </ul>
     `
-  },
-  {
-    title: "Monitoring, Logging & Analytics (Conceptual)",
-    content: `
+    },
+    {
+        title: "Monitoring, Logging & Analytics (Conceptual)",
+        content: `
       <p>Once your app is live, it's crucial to observe its health, track errors, and understand how users are interacting with it.</p>
       <h3>Key Areas:</h3>
       <ul>
@@ -733,7 +768,7 @@ async function callGeminiViaBackend(userPromptText: string, systemInstructionTex
         </li>
       </ul>
     `
-  }
+    }
 ].map(item => ({
     ...item,
     chatHistory: [],
@@ -750,47 +785,47 @@ type AppView = 'launchpad' | 'guide' | 'tools';
 type ProjectInputMode = 'describe' | 'url' | 'code';
 
 interface SubStep {
-  id: string; // e.g., cardId-sub-0
-  instruction: string;
-  completed: boolean;
+    id: string; // e.g., cardId-sub-0
+    instruction: string;
+    completed: boolean;
 }
 
 interface ChatMessage {
-  id: string; // e.g., cardId-chat-msg-0
-  sender: 'user' | 'ai';
-  text: string;
-  timestamp: Date;
+    id: string; // e.g., cardId-chat-msg-0
+    sender: 'user' | 'ai';
+    text: string;
+    timestamp: Date;
 }
 
 interface DetailedCardData {
-  id: string;
-  title: string;
-  type: CardType;
-  content: string; // HTML content, to be sanitized or carefully generated
-  completed: boolean;
-  decisionContextId?: string; // For option cards, links to the parent decision card ID
-  activatedByOptionId?: string; // For step/decision cards, this card is only relevant if the specified option ID is chosen
+    id: string;
+    title: string;
+    type: CardType;
+    content: string; // HTML content, to be sanitized or carefully generated
+    completed: boolean;
+    decisionContextId?: string; // For option cards, links to the parent decision card ID
+    activatedByOptionId?: string; // For step/decision cards, this card is only relevant if the specified option ID is chosen
 
-  // For step-by-step breakdown
-  subSteps?: SubStep[];
-  isBreakingDown?: boolean;
-  breakdownError?: string | null;
+    // For step-by-step breakdown
+    subSteps?: SubStep[];
+    isBreakingDown?: boolean;
+    breakdownError?: string | null;
 
-  // For in-card chat
-  chatHistory?: ChatMessage[];
-  isChatLoading?: boolean;
-  chatError?: string | null;
-  currentChatQuery?: string; // Bound to the chat input field for this card
-  suggestedStep?: { title: string; type: CardType; content: string; } | null;
-  chatChips?: string[];
+    // For in-card chat
+    chatHistory?: ChatMessage[];
+    isChatLoading?: boolean;
+    chatError?: string | null;
+    currentChatQuery?: string; // Bound to the chat input field for this card
+    suggestedStep?: { title: string; type: CardType; content: string; } | null;
+    chatChips?: string[];
 
-  // For collapsible decision cards
-  isExpanded?: boolean;
+    // For collapsible decision cards
+    isExpanded?: boolean;
 
-  // For Cloud Console prompt generation
-  isGeneratingCloudPrompt?: boolean;
-  generatedCloudPrompt?: string | null;
-  cloudPromptError?: string | null;
+    // For Cloud Console prompt generation
+    isGeneratingCloudPrompt?: boolean;
+    generatedCloudPrompt?: string | null;
+    cloudPromptError?: string | null;
 }
 
 interface SandboxState {
@@ -821,13 +856,13 @@ interface ApplicationState {
 
 
 interface RoadmapStep {
-  id: string; // Corresponds to the generated card ID
-  title: string;
-  type: CardType;
-  completed: boolean;
-  relatedCardId: string; // ID of the detailed card this roadmap step links to
-  isArchived?: boolean;
-  activatedByOptionId?: string;
+    id: string; // Corresponds to the generated card ID
+    title: string;
+    type: CardType;
+    completed: boolean;
+    relatedCardId: string; // ID of the detailed card this roadmap step links to
+    isArchived?: boolean;
+    activatedByOptionId?: string;
 }
 
 interface ToolState {
@@ -880,14 +915,14 @@ declare var hljs: any;
 
 
 if (API_KEY) {
-  try {
-    ai = new GoogleGenAI({ apiKey: API_KEY });
-  } catch (error) {
-    console.error("Failed to initialize GoogleGenAI:", error);
-    globalAiError = "Failed to initialize AI. API Key might be invalid or not configured correctly.";
-  }
+    try {
+        ai = new GoogleGenAI({ apiKey: API_KEY });
+    } catch (error) {
+        console.error("Failed to initialize GoogleGenAI:", error);
+        globalAiError = "Failed to initialize AI. API Key might be invalid or not configured correctly.";
+    }
 } else {
-  console.warn("API_KEY environment variable not found. AI Launchpad functionality will be limited or disabled.");
+    console.warn("API_KEY environment variable not found. AI Launchpad functionality will be limited or disabled.");
 }
 
 
@@ -906,7 +941,7 @@ function generateUniqueId(prefix: string = 'id'): string {
 
 function sanitizeHtml(htmlString: string): string {
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlString; 
+    tempDiv.innerHTML = htmlString;
 
     Array.from(tempDiv.getElementsByTagName('script')).forEach(script => script.remove());
     Array.from(tempDiv.querySelectorAll('*')).forEach(el => {
@@ -930,13 +965,13 @@ function stripHtml(html: string): string {
 
 function findCardGlobally(cardId: string): DetailedCardData | undefined {
     return detailedCards.find(c => c.id === cardId) ||
-           completedDetailedCards.find(c => c.id === cardId) ||
-           archivedCards.find(c => c.id === cardId);
+        completedDetailedCards.find(c => c.id === cardId) ||
+        archivedCards.find(c => c.id === cardId);
 }
 
 function findStaticCard(cardId: string): StaticGuideCardData | undefined {
     let found: StaticGuideCardData | undefined;
-    
+
     function search(cards: StaticGuideCardData[]) {
         for (const card of cards) {
             if (card.title.replace(/\s+/g, '-') === cardId) {
@@ -949,7 +984,7 @@ function findStaticCard(cardId: string): StaticGuideCardData | undefined {
             }
         }
     }
-    
+
     search(staticGuideData);
     return found;
 }
@@ -981,10 +1016,10 @@ function unarchiveGivenCard(cardToUnarchive: DetailedCardData) {
     const index = archivedCards.findIndex(c => c.id === cardToUnarchive.id);
     if (index > -1) {
         archivedCards.splice(index, 1);
-        if (!detailedCards.find(c => c.id === cardToUnarchive.id) && !completedDetailedCards.find(c => c.id === cardToUnarchive.id)) { 
-            detailedCards.push(cardToUnarchive); 
+        if (!detailedCards.find(c => c.id === cardToUnarchive.id) && !completedDetailedCards.find(c => c.id === cardToUnarchive.id)) {
+            detailedCards.push(cardToUnarchive);
         }
-        detailedCards.sort((a,b) => {
+        detailedCards.sort((a, b) => {
             const indexA = roadmapSteps.findIndex(rs => rs.id === a.id);
             const indexB = roadmapSteps.findIndex(rs => rs.id === b.id);
             return indexA - indexB;
@@ -1125,8 +1160,8 @@ function loadStateFromLocalStorage() {
                     if (card.chatChips === undefined) {
                         let chips = DEFAULT_CHAT_CHIPS;
                         if (card.title === "Reassessment & Plan Adjustment") {
-                             const devToolsCard = staticGuideData.find(c => c.title === "Lifecycle & Strategy");
-                             const reassessmentStaticData = devToolsCard?.children?.find(c => c.title === "Reassessment & Plan Adjustment");
+                            const devToolsCard = staticGuideData.find(c => c.title === "Lifecycle & Strategy");
+                            const reassessmentStaticData = devToolsCard?.children?.find(c => c.title === "Reassessment & Plan Adjustment");
                             if (reassessmentStaticData?.chatChips) {
                                 chips = reassessmentStaticData.chatChips;
                             }
@@ -1135,8 +1170,8 @@ function loadStateFromLocalStorage() {
                     }
                 });
                 roadmapSteps.forEach(rs => {
-                    if(rs.activatedByOptionId === undefined) rs.activatedByOptionId = undefined;
-                    if(rs.isArchived === undefined) rs.isArchived = false;
+                    if (rs.activatedByOptionId === undefined) rs.activatedByOptionId = undefined;
+                    if (rs.isArchived === undefined) rs.isArchived = false;
                 });
             }
         }
@@ -1224,21 +1259,21 @@ function renderLaunchpad() {
                         <input type="search" id="launchpad-search-input" placeholder="Search steps..." value="${launchpadSearchQuery}">
                     </div>
                     <div id="detailed-cards-container">
-                        ${ renderFilteredCards(detailedCards, 'active') }
+                        ${renderFilteredCards(detailedCards, 'active')}
                     </div>
                 </section>
 
                 <section class="launchpad-section" id="completed-roadmap-section" aria-labelledby="completed-roadmap-heading" style="display: ${!isClarifying && completedDetailedCards.length > 0 ? 'block' : 'none'};">
                     <h2 id="completed-roadmap-heading">Completed Steps</h2>
                     <div id="completed-cards-container">
-                        ${ renderFilteredCards(completedDetailedCards, 'completed') }
+                        ${renderFilteredCards(completedDetailedCards, 'completed')}
                     </div>
                 </section>
 
                 <section class="launchpad-section" id="archived-items-section" aria-labelledby="archived-items-heading" style="display: ${!isClarifying && archivedCards.length > 0 ? 'block' : 'none'};">
                     <h2 id="archived-items-heading">Archived Items</h2>
                     <div id="archived-cards-container">
-                        ${ renderFilteredCards(archivedCards, 'archived') }
+                        ${renderFilteredCards(archivedCards, 'archived')}
                     </div>
                 </section>
             </div>
@@ -1274,11 +1309,11 @@ function renderLaunchpad() {
 
     if (globalAiError && !API_KEY) {
         const generateBtn = document.getElementById('generate-plan-btn') as HTMLButtonElement;
-        if(generateBtn) generateBtn.disabled = true;
+        if (generateBtn) generateBtn.disabled = true;
         const errorDiv = document.getElementById('global-ai-error-message') as HTMLDivElement;
-        if(errorDiv && !errorDiv.textContent) {
-             errorDiv.textContent = "AI features are disabled. API_KEY is not configured.";
-             errorDiv.style.display = "block";
+        if (errorDiv && !errorDiv.textContent) {
+            errorDiv.textContent = "AI features are disabled. API_KEY is not configured.";
+            errorDiv.style.display = "block";
         }
     }
     const projectDescTextarea = document.getElementById('project-description') as HTMLTextAreaElement;
@@ -1289,7 +1324,7 @@ function renderLaunchpad() {
     if (projectUrlInput && currentProjectUrl) {
         projectUrlInput.value = currentProjectUrl;
     }
-     const projectCodeTextarea = document.getElementById('project-code') as HTMLTextAreaElement;
+    const projectCodeTextarea = document.getElementById('project-code') as HTMLTextAreaElement;
     if (projectCodeTextarea && currentProjectCode) {
         projectCodeTextarea.value = currentProjectCode;
     }
@@ -1343,13 +1378,13 @@ function renderRoadmapOverview(): string {
             html += `<div class="roadmap-group">`;
             html += `<div class="roadmap-decision-row">${renderMiniCard(step)}</div>`;
             processedStepIds.add(step.id);
-            
+
             const optionSteps = roadmapSteps.filter(rs => {
                 const detailCard = allCardsMap.get(rs.relatedCardId);
-                return detailCard && 
-                       (detailCard.type === 'option-best' || detailCard.type === 'option-other') && 
-                       detailCard.decisionContextId === step.relatedCardId && 
-                       !rs.isArchived;
+                return detailCard &&
+                    (detailCard.type === 'option-best' || detailCard.type === 'option-other') &&
+                    detailCard.decisionContextId === step.relatedCardId &&
+                    !rs.isArchived;
             });
 
             if (optionSteps.length > 0) {
@@ -1363,8 +1398,8 @@ function renderRoadmapOverview(): string {
                     processedStepIds.add(optStep.id);
 
                     const subsequentSteps = roadmapSteps.filter(s => {
-                         const card = allCardsMap.get(s.relatedCardId);
-                         return card?.activatedByOptionId === optStep.relatedCardId && !s.isArchived && isVisible(card);
+                        const card = allCardsMap.get(s.relatedCardId);
+                        return card?.activatedByOptionId === optStep.relatedCardId && !s.isArchived && isVisible(card);
                     });
 
                     if (subsequentSteps.length > 0) {
@@ -1381,13 +1416,13 @@ function renderRoadmapOverview(): string {
             }
             html += `</div>`;
         } else if (currentCard && !currentCard.decisionContextId && !currentCard.activatedByOptionId) {
-             html += `<div class="roadmap-group single-step">${renderMiniCard(step)}</div>`;
-             processedStepIds.add(step.id);
+            html += `<div class="roadmap-group single-step">${renderMiniCard(step)}</div>`;
+            processedStepIds.add(step.id);
         }
     });
 
     if (html.trim() === '') {
-      return '<p class="empty-state-message">No roadmap steps to display. Generate or load a plan.</p>';
+        return '<p class="empty-state-message">No roadmap steps to display. Generate or load a plan.</p>';
     }
     return html;
 }
@@ -1400,13 +1435,13 @@ function renderMiniCard(step: RoadmapStep, isInnerOption: boolean = false, isSel
     if (step.isArchived) extraClass += ' archived';
     if (isInnerOption) extraClass += ' inner-option-minicard';
     if (isSelected) extraClass += ' selected';
-    
+
     const detailedCard = findCardGlobally(step.relatedCardId);
     let title = step.title;
     if (detailedCard && detailedCard.type !== 'decision' && detailedCard.decisionContextId) {
         const parentDecision = findCardGlobally(detailedCard.decisionContextId);
         if (parentDecision && parentDecision.completed && selectedOptionForDecision[parentDecision.id] !== step.relatedCardId) {
-             extraClass += ' archived';
+            extraClass += ' archived';
         }
     }
 
@@ -1482,7 +1517,7 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
                 </div>`;
         }
     }
-    
+
     let subStepsHtml = '';
     if (card.subSteps && card.subSteps.length > 0) {
         subStepsHtml = `
@@ -1504,18 +1539,18 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
     // Chat is available on all active cards that are not tools
     const associatedStaticCard = staticGuideData.find(d => d.title === card.title);
     if (context === 'active' || (associatedStaticCard && !associatedStaticCard.isTool)) {
-         let chatChipsHtml = '';
-         if (card.chatChips && card.chatChips.length > 0) {
-             chatChipsHtml = `
+        let chatChipsHtml = '';
+        if (card.chatChips && card.chatChips.length > 0) {
+            chatChipsHtml = `
                  <div class="chat-chips-container">
                      ${card.chatChips.map(chipText => `
                          <button class="chat-chip" data-card-id="${card.id}">${sanitizeHtml(chipText)}</button>
                      `).join('')}
                  </div>
              `;
-         }
+        }
 
-         chatHtml = `
+        chatHtml = `
         <div class="in-card-chat-container">
              <h5>Need Help? Ask AI</h5>
              <div class="chat-history" id="chat-history-${card.id}">
@@ -1549,10 +1584,10 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
 
     let cloudPromptGeneratorHtml = '';
     // Show on specific card types that are active
-    const showCloudPromptGenerator = context === 'active' && 
-                                      (card.title.toLowerCase().includes('google cloud') || 
-                                       card.title.toLowerCase().includes('backend') ||
-                                       card.title.toLowerCase().includes('database'));
+    const showCloudPromptGenerator = context === 'active' &&
+        (card.title.toLowerCase().includes('google cloud') ||
+            card.title.toLowerCase().includes('backend') ||
+            card.title.toLowerCase().includes('database'));
     if (showCloudPromptGenerator) {
         cloudPromptGeneratorHtml = `
             <div class="cloud-prompt-generator">
@@ -1602,12 +1637,12 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
                  <button class="action-btn" data-card-id="${card.id}" data-action="reopen">Re-open Step</button>
             </div>`;
     } else if (context === 'archived') {
-         cardFooterHtml = `
+        cardFooterHtml = `
             <div class="card-footer">
                  <button class="action-btn" data-card-id="${card.id}" data-action="unarchive">Unarchive</button>
             </div>`;
     }
-    
+
     return `
         <div class="${cardClasses}" id="card-${card.id}" data-card-id="${card.id}">
             <div class="detailed-card-header ${isDecisionCard ? 'clickable' : ''}" data-card-id="${card.id}" data-action="toggle-expand">
@@ -1624,8 +1659,8 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
                     ${card.isBreakingDown ? '<div class="card-loading small-spinner">Breaking down into sub-steps...</div>' : ''}
                     ${card.breakdownError ? `<div class="error-message">${card.breakdownError}</div>` : ''}
                     ${(!card.subSteps || card.subSteps.length === 0) && !isDecisionCard && context === 'active' && !card.isBreakingDown ?
-                        `<button class="action-btn breakdown-btn" data-card-id="${card.id}">Break Down into Sub-steps</button>` : ''
-                    }
+            `<button class="action-btn breakdown-btn" data-card-id="${card.id}">Break Down into Sub-steps</button>` : ''
+        }
                     ${chatHtml}
                     ${cloudPromptGeneratorHtml}
                 </div>
@@ -1644,7 +1679,7 @@ function renderMinimapNode(step: RoadmapStep, level: number = 0): string {
     if (detailedCard && detailedCard.type !== 'decision' && detailedCard.decisionContextId) {
         const parentDecision = findCardGlobally(detailedCard.decisionContextId);
         if (parentDecision && parentDecision.completed && selectedOptionForDecision[parentDecision.id] !== step.relatedCardId) {
-             extraClass += ' archived';
+            extraClass += ' archived';
         }
     }
 
@@ -1782,10 +1817,10 @@ function renderGuide() {
         : staticGuideData.filter(card => {
             const query = guideSearchQuery.toLowerCase();
             const selfMatch = card.title.toLowerCase().includes(query) ||
-                            stripHtml(card.content).toLowerCase().includes(query);
+                stripHtml(card.content).toLowerCase().includes(query);
             if (selfMatch) return true;
 
-            const childMatch = card.children?.some(child => 
+            const childMatch = card.children?.some(child =>
                 child.title.toLowerCase().includes(query) ||
                 stripHtml(child.content).toLowerCase().includes(query)
             );
@@ -1812,13 +1847,13 @@ function renderStaticGuideCard(cardData: StaticGuideCardData) {
     const childrenHtml = cardData.children
         ? `<div class="nested-guide-cards">${cardData.children.map(child => renderStaticGuideCard(child)).join('')}</div>`
         : '';
-    
+
     let isOpen = false;
     if (guideSearchQuery.trim() !== '' && cardData.children) {
         const query = guideSearchQuery.toLowerCase();
         const selfMatch = cardData.title.toLowerCase().includes(query) ||
-                        stripHtml(cardData.content).toLowerCase().includes(query);
-        const childMatch = cardData.children.some(child => 
+            stripHtml(cardData.content).toLowerCase().includes(query);
+        const childMatch = cardData.children.some(child =>
             child.title.toLowerCase().includes(query) ||
             stripHtml(child.content).toLowerCase().includes(query)
         );
@@ -1835,7 +1870,7 @@ function renderStaticGuideCard(cardData: StaticGuideCardData) {
         if (cardData.currentChatQuery === undefined) cardData.currentChatQuery = '';
 
         const cardId = cardData.title.replace(/\s+/g, '-');
-        
+
         let chatChipsHtml = '';
         if (cardData.chatChips && cardData.chatChips.length > 0) {
             chatChipsHtml = `
@@ -1966,7 +2001,7 @@ function renderFileManagerTool(): string {
 
 function renderToolCard(cardData: StaticGuideCardData) {
     const toolTitleId = cardData.title.replace(/\s+/g, '-');
-    
+
     if (cardData.title === "Live Code Sandbox") {
         return `
             <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
@@ -2002,7 +2037,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
             </section>
         `;
     }
-    
+
     // For regular tools or tools with embedded forms like GitHub Assistant
     const isRegularTool = !["Live Code Sandbox", "Project File Manager", "GitHub Assistant"].includes(cardData.title);
 
@@ -2015,7 +2050,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
         if (cardData.title === "Mermaid Diagram Builder") {
             outputHtml = `<div class="mermaid-diagram" id="mermaid-output-container-${toolTitleId}">${toolState.output}</div>`;
         } else {
-             outputHtml = sanitizeHtml(marked.parse(toolState.output) as string);
+            outputHtml = sanitizeHtml(marked.parse(toolState.output) as string);
         }
     }
 
@@ -2028,7 +2063,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
             ${roadmapSteps.length === 0 ? '<span class="context-disabled-note">(Generate a plan in AI Launchpad first)</span>' : ''}
         </div>
     ` : '';
-    
+
     const outputId = `tool-output-${toolTitleId}`;
 
     return `
@@ -2087,7 +2122,7 @@ function attachAllEventListeners() {
     navLaunchpad.addEventListener('click', (e) => { e.preventDefault(); updateView('launchpad'); });
     navGuide.addEventListener('click', (e) => { e.preventDefault(); updateView('guide'); });
     navTools.addEventListener('click', (e) => { e.preventDefault(); updateView('tools'); });
-    
+
     // Scroll to top button
     const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
     if (scrollToTopBtn) {
@@ -2105,22 +2140,22 @@ function attachAllEventListeners() {
     if (currentView === 'launchpad') {
         const form = document.getElementById('project-description-form');
         form?.addEventListener('submit', handleProjectFormSubmit);
-        
+
         const clarificationForm = document.getElementById('clarification-chat-form');
         clarificationForm?.addEventListener('submit', handleClarificationSubmit);
-        
+
         const generatePlanFromConvoBtn = document.getElementById('generate-plan-from-convo-btn');
         generatePlanFromConvoBtn?.addEventListener('click', handleGeneratePlanFromConvo);
-        
+
         const tabs = document.querySelectorAll('.tab-btn');
         tabs.forEach(tab => tab.addEventListener('click', () => switchInputMode(tab.getAttribute('data-mode') as ProjectInputMode)));
 
         const uploadInput = document.getElementById('upload-plan-input');
         uploadInput?.addEventListener('change', handleFileUpload);
-        
+
         const downloadBtn = document.getElementById('download-plan-btn');
         downloadBtn?.addEventListener('click', handlePlanDownload);
-        
+
         const launchpadSearchInput = document.getElementById('launchpad-search-input');
         launchpadSearchInput?.addEventListener('input', (e) => {
             launchpadSearchQuery = (e.target as HTMLInputElement).value;
@@ -2135,12 +2170,12 @@ function attachAllEventListeners() {
             guideSearchQuery = (e.target as HTMLInputElement).value;
             renderGuide();
         });
-        
+
         const interactiveChatForms = document.querySelectorAll('.guide-card .in-card-chat-form');
         interactiveChatForms.forEach(form => {
             form.addEventListener('submit', handleCardChatSubmit);
-             const textarea = form.querySelector('textarea');
-            if(textarea) {
+            const textarea = form.querySelector('textarea');
+            if (textarea) {
                 textarea.addEventListener('input', (e) => {
                     const cardId = form.getAttribute('data-card-id');
                     const card = findStaticCard(cardId || '');
@@ -2150,7 +2185,7 @@ function attachAllEventListeners() {
                 });
             }
         });
-        
+
         const guideContainer = document.getElementById('guide-cards-container');
         guideContainer?.addEventListener('click', (e) => {
             const target = e.target as HTMLElement;
@@ -2162,7 +2197,7 @@ function attachAllEventListeners() {
                 if (cardId) {
                     const card = findStaticCard(cardId);
                     const inputEl = document.getElementById(`chat-input-${cardId}`) as HTMLTextAreaElement;
-                    
+
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
@@ -2179,7 +2214,7 @@ function attachAllEventListeners() {
         toolForms.forEach(form => {
             form.addEventListener('submit', handleToolSubmit);
         });
-        
+
         document.querySelectorAll('.tool-context-toggle input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 const target = e.target as HTMLInputElement;
@@ -2201,7 +2236,7 @@ function attachAllEventListeners() {
         if (sandboxAiForm) {
             sandboxAiForm.addEventListener('submit', handleSandboxAiRequest);
             const textarea = sandboxAiForm.querySelector('textarea');
-            if(textarea) {
+            if (textarea) {
                 textarea.addEventListener('input', (e) => {
                     const toolTitle = "Live Code Sandbox";
                     if (!toolStates[toolTitle]) {
@@ -2230,7 +2265,7 @@ function attachAllEventListeners() {
             useCodeForPlanBtn.addEventListener('click', handleUseSandboxCodeForPlan);
         }
     }
-    
+
     document.querySelectorAll('.copy-code-btn').forEach(button => {
         button.addEventListener('click', () => {
             let textToCopy = '';
@@ -2247,7 +2282,7 @@ function attachAllEventListeners() {
             }
 
             if (textToCopy) {
-                 navigator.clipboard.writeText(textToCopy).then(() => {
+                navigator.clipboard.writeText(textToCopy).then(() => {
                     button.textContent = 'Copied!';
                     button.classList.add('copied');
                     setTimeout(() => {
@@ -2260,16 +2295,16 @@ function attachAllEventListeners() {
             }
         });
     });
-    
+
     hljs.highlightAll();
-    
+
     document.querySelectorAll('.mermaid-diagram').forEach((el) => {
         try {
             const id = 'mermaid-svg-' + generateUniqueId();
             mermaid.render(id, el.textContent || '', (svgCode: string) => {
                 el.innerHTML = svgCode;
             });
-        } catch(e) {
+        } catch (e) {
             console.error("Mermaid render error:", e);
             el.innerHTML = `<p class="error-message">Error rendering diagram. Check Mermaid syntax.</p>`;
         }
@@ -2311,7 +2346,7 @@ function attachCardEventListeners() {
                             handleToggleComplete(cardId, 'completed');
                             break;
                         case 'archive':
-                             const sourceList = actionButton.closest('#completed-cards-container') ? completedDetailedCards : detailedCards;
+                            const sourceList = actionButton.closest('#completed-cards-container') ? completedDetailedCards : detailedCards;
                             handleArchiveCard(cardId, sourceList);
                             break;
                         case 'unarchive':
@@ -2327,16 +2362,16 @@ function attachCardEventListeners() {
                     }
                 }
             }
-            
+
             // Decision option mini-card selection
-             const optionMiniCard = target.closest('.inner-option-minicard');
-             if (optionMiniCard) {
+            const optionMiniCard = target.closest('.inner-option-minicard');
+            if (optionMiniCard) {
                 const optionCardId = optionMiniCard.getAttribute('data-scroll-to')?.replace('card-', '');
                 const decisionCardId = optionMiniCard.closest('.detailed-card')?.getAttribute('data-card-id');
                 if (optionCardId && decisionCardId) {
                     handleOptionSelection(optionCardId, decisionCardId);
                 }
-             }
+            }
 
             // Breakdown button
             const breakdownBtn = target.closest('.breakdown-btn');
@@ -2344,7 +2379,7 @@ function attachCardEventListeners() {
                 const cardId = breakdownBtn.getAttribute('data-card-id');
                 if (cardId) handleBreakdown(cardId);
             }
-            
+
             // Add Suggested Step
             if (target.id.startsWith('add-suggested-step-btn-')) {
                 const cardId = target.getAttribute('data-card-id');
@@ -2352,12 +2387,12 @@ function attachCardEventListeners() {
             }
 
             // Generate Cloud Prompt
-             const genCloudPromptBtn = target.closest('.generate-cloud-prompt-btn');
+            const genCloudPromptBtn = target.closest('.generate-cloud-prompt-btn');
             if (genCloudPromptBtn) {
                 const cardId = genCloudPromptBtn.getAttribute('data-card-id');
                 if (cardId) handleGenerateCloudPrompt(cardId);
             }
-            
+
             // Chat Chip Click
             const chatChip = target.closest('.chat-chip');
             if (chatChip) {
@@ -2396,7 +2431,7 @@ function attachCardEventListeners() {
             form.addEventListener('submit', handleCardChatSubmit);
             // Also update state on input for seamless re-render
             const textarea = form.querySelector('textarea');
-            if(textarea) {
+            if (textarea) {
                 textarea.addEventListener('input', (e) => {
                     const cardId = form.getAttribute('data-card-id');
                     const card = findCardGlobally(cardId || '');
@@ -2431,9 +2466,9 @@ async function handleProjectFormSubmit(event: Event) {
     currentProjectDescription = descriptionTextarea.value;
     currentProjectUrl = urlInput.value;
     currentProjectCode = codeTextarea.value;
-    
+
     let userInput = '';
-    switch(projectInputMode) {
+    switch (projectInputMode) {
         case 'describe': userInput = currentProjectDescription; break;
         case 'url': userInput = `URL: ${currentProjectUrl}`; break;
         case 'code': userInput = `CODE:\n\`\`\`\n${currentProjectCode}\n\`\`\``; break;
@@ -2478,7 +2513,7 @@ async function handleClarificationSubmit(event: Event) {
     const input = document.getElementById('clarification-chat-input') as HTMLTextAreaElement;
     const userQuery = input.value.trim();
     if (!userQuery || isClarificationLoading) return;
-    
+
     currentClarificationQuery = ''; // Clear input immediately
     clarificationChatHistory.push({
         id: generateUniqueId('msg'),
@@ -2492,7 +2527,7 @@ async function handleClarificationSubmit(event: Event) {
     const fullConversation = clarificationChatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     try {
         const aiResponse = await callGeminiForClarification(fullConversation);
-         clarificationChatHistory.push({
+        clarificationChatHistory.push({
             id: generateUniqueId('msg'),
             sender: 'ai',
             text: aiResponse,
@@ -2516,7 +2551,7 @@ function handleGeneratePlanFromConvo() {
 function switchInputMode(mode: ProjectInputMode) {
     if (projectInputMode === mode) return;
     projectInputMode = mode;
-    
+
     // Reset other input fields
     if (mode === 'describe') {
         currentProjectUrl = "";
@@ -2528,7 +2563,7 @@ function switchInputMode(mode: ProjectInputMode) {
         currentProjectDescription = "";
         currentProjectUrl = "";
     }
-    
+
     updateView();
 }
 
@@ -2540,13 +2575,13 @@ function handleToggleComplete(cardId: string, fromContext: 'active' | 'completed
     saveUndoState();
 
     const cardElement = document.getElementById(`card-${cardId}`);
-    
+
     if (fromContext === 'active') {
         const index = detailedCards.findIndex(c => c.id === cardId);
         detailedCards.splice(index, 1);
         cardToMove.completed = true;
         // Mark all sub-steps as complete
-        if(cardToMove.subSteps) {
+        if (cardToMove.subSteps) {
             cardToMove.subSteps.forEach(s => s.completed = true);
         }
         completedDetailedCards.unshift(cardToMove);
@@ -2556,10 +2591,10 @@ function handleToggleComplete(cardId: string, fromContext: 'active' | 'completed
         completedDetailedCards.splice(index, 1);
         cardToMove.completed = false;
         detailedCards.push(cardToMove);
-        detailedCards.sort((a,b) => {
-             const indexA = roadmapSteps.findIndex(rs => rs.id === a.id);
-             const indexB = roadmapSteps.findIndex(rs => rs.id === b.id);
-             return indexA - indexB;
+        detailedCards.sort((a, b) => {
+            const indexA = roadmapSteps.findIndex(rs => rs.id === a.id);
+            const indexB = roadmapSteps.findIndex(rs => rs.id === b.id);
+            return indexA - indexB;
         });
         showUndoToast(`Step "${cardToMove.title}" re-opened.`);
     }
@@ -2568,8 +2603,8 @@ function handleToggleComplete(cardId: string, fromContext: 'active' | 'completed
     if (roadmapItem) {
         roadmapItem.completed = cardToMove.completed;
     }
-    
-     if (cardElement) {
+
+    if (cardElement) {
         cardElement.classList.add('is-completing');
         setTimeout(() => {
             updateView();
@@ -2668,7 +2703,7 @@ function handleSubStepToggle(cardId: string, subStepId: string) {
     if (subStep) {
         subStep.completed = !subStep.completed;
     }
-    
+
     // Check if all sub-steps are now complete
     const allSubStepsComplete = card.subSteps.every(s => s.completed);
     if (allSubStepsComplete) {
@@ -2789,7 +2824,7 @@ function handleAddSuggestedStep(cardId: string) {
         cloudPromptError: null,
         chatChips: DEFAULT_CHAT_CHIPS,
     };
-    
+
     const newRoadmapStep: RoadmapStep = {
         id: newCardId,
         title,
@@ -2808,7 +2843,7 @@ function handleAddSuggestedStep(cardId: string) {
         roadmapSteps.push(newRoadmapStep);
         detailedCards.push(newCard);
     }
-    
+
     card.suggestedStep = null; // Clear the suggestion
     updateView();
     saveStateToLocalStorage();
@@ -2820,22 +2855,22 @@ async function handleToolSubmit(event: Event) {
     const form = event.currentTarget as HTMLFormElement;
     const title = form.getAttribute('data-tool-title');
     if (!title) return;
-    
+
     const textarea = form.querySelector('textarea');
     // For PR template, there's no input, so textarea can be null
     const input = textarea ? textarea.value : '';
 
     if (!toolStates[title]) toolStates[title] = { input: '', output: '', isLoading: false, error: null, useProjectContext: false };
-    
+
     toolStates[title].input = input;
     toolStates[title].isLoading = true;
     toolStates[title].error = null;
     toolStates[title].output = '';
-    
+
     // Since this can be a sub-tool, we need to re-render the whole tools view
     // to show the loading state correctly.
     if (currentView === 'tools') {
-         renderToolsView(); // Re-render to show loading spinner
+        renderToolsView(); // Re-render to show loading spinner
     }
 
 
@@ -2845,10 +2880,10 @@ async function handleToolSubmit(event: Event) {
             const action = title.split(':')[1];
             output = await callGeminiForGitHubTool(action, input);
         } else {
-             // Logic for other tools
+            // Logic for other tools
             let projectContext: string | undefined = undefined;
             if (toolStates[title]?.useProjectContext && roadmapSteps.length > 0) {
-                 const activeSteps = detailedCards.map(c => `- ${c.title}`).join('\n');
+                const activeSteps = detailedCards.map(c => `- ${c.title}`).join('\n');
                 const completedSteps = completedDetailedCards.map(c => `- ${c.title} (Completed)`).join('\n');
                 const decisions = Object.entries(selectedOptionForDecision).map(([decisionId, optionId]) => {
                     const decisionCard = findCardGlobally(decisionId);
@@ -2869,7 +2904,7 @@ async function handleToolSubmit(event: Event) {
         ---
         `;
             }
-             output = await callGeminiForTool(title, input, projectContext);
+            output = await callGeminiForTool(title, input, projectContext);
         }
         toolStates[title].output = output;
 
@@ -2879,7 +2914,7 @@ async function handleToolSubmit(event: Event) {
     } finally {
         toolStates[title].isLoading = false;
         // Re-render again to show the final result
-         if (currentView === 'tools') {
+        if (currentView === 'tools') {
             renderToolsView();
         }
     }
@@ -2903,18 +2938,18 @@ async function handleSandboxAiRequest(event: Event) {
 
     try {
         const code = await callGeminiForSandbox(prompt);
-        
+
         sandboxState.html = code.html;
         sandboxState.css = code.css;
         sandboxState.js = code.js;
-        
+
     } catch (e) {
         console.error("Error in Sandbox AI:", e);
         state.error = (e as Error).message;
     } finally {
         state.isLoading = false;
         renderToolsView(); // Re-render to show result/error and stop spinner
-        
+
         // After re-rendering with the new code in the textareas, run it.
         setTimeout(handleRunSandbox, 50);
     }
@@ -2946,20 +2981,20 @@ function scrollToElement(elementId: string) {
     if (targetElement) {
         // First, ensure the card is expanded if it's a decision card
         const cardId = targetElement.dataset.cardId;
-        if(cardId) {
+        if (cardId) {
             const card = findCardGlobally(cardId);
-            if(card && card.type === 'decision' && !card.isExpanded) {
+            if (card && card.type === 'decision' && !card.isExpanded) {
                 card.isExpanded = true;
                 updateView();
                 // We need to wait for the re-render before scrolling
                 setTimeout(() => {
-                     const freshElement = document.getElementById(elementId);
-                     freshElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const freshElement = document.getElementById(elementId);
+                    freshElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 50); // Small delay for DOM update
                 return;
             }
         }
-        
+
         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -2979,7 +3014,7 @@ function handleFileUpload(event: Event) {
             const result = e.target?.result as string;
             const loadedState: ApplicationState = JSON.parse(result);
             if (loadedState && loadedState.roadmapSteps && loadedState.detailedCards) {
-                 // Assign loaded state to current state variables
+                // Assign loaded state to current state variables
                 currentProjectDescription = loadedState.projectDescription || "";
                 currentProjectUrl = loadedState.projectUrl || "";
                 currentProjectCode = loadedState.projectCode || "";
@@ -2990,7 +3025,7 @@ function handleFileUpload(event: Event) {
                 archivedCards = loadedState.archivedCards || [];
                 selectedOptionForDecision = loadedState.selectedOptionForDecision || {};
                 sandboxState = loadedState.sandboxState || sandboxState;
-                
+
                 // Reset any transient state
                 isClarifying = false;
                 clarificationChatHistory = [];
@@ -3051,14 +3086,14 @@ function handleRunSandbox() {
         </body>
         </html>
     `;
-    
+
     iframe.srcdoc = sourceDoc;
     saveStateToLocalStorage(); // Persist changes when code is run
 }
 
 function handleUseSandboxCodeForPlan() {
     const combinedCode = `<!-- HTML -->\n${sandboxState.html}\n\n<style>\n/* CSS */\n${sandboxState.css}\n</style>\n\n<script>\n// JavaScript\n${sandboxState.js}<\/script>`;
-    
+
     currentProjectCode = combinedCode;
     projectInputMode = 'code';
     // Clear other input modes' data to avoid confusion
@@ -3066,7 +3101,7 @@ function handleUseSandboxCodeForPlan() {
     currentProjectUrl = "";
 
     updateView('launchpad');
-    
+
     // After view update, scroll to the input section to show the user where the code went.
     setTimeout(() => {
         document.getElementById('project-input-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -3097,7 +3132,7 @@ async function generatePlan(userInput: string) {
 async function callGeminiForPlan(userInput: string): Promise<string> {
     if (!ai) { throw new Error("AI Client not initialized. Check API Key."); }
     const model = 'gemini-2.5-flash';
-    
+
     const systemInstruction = `You are an expert project manager and senior software architect specializing in deploying web applications using Google Cloud and Firebase.
 Your task is to create a detailed, step-by-step project plan based on a user's project description.
 
@@ -3153,7 +3188,7 @@ Example Structure:
     }
   ]
 }`;
-    
+
     const prompt = `User's project description: "${userInput}"`;
 
     const response = await ai.models.generateContent({
@@ -3177,8 +3212,8 @@ function parseAiResponseToCards(jsonString: string) {
         const newDetailedCards: DetailedCardData[] = parsed.plan.map((item: any) => {
             let chips = DEFAULT_CHAT_CHIPS;
             if (item.title === "Reassessment & Plan Adjustment") {
-                 const devToolsCard = staticGuideData.find(c => c.title === "Lifecycle & Strategy");
-                 const reassessmentStaticData = devToolsCard?.children?.find(c => c.title === "Reassessment & Plan Adjustment");
+                const devToolsCard = staticGuideData.find(c => c.title === "Lifecycle & Strategy");
+                const reassessmentStaticData = devToolsCard?.children?.find(c => c.title === "Reassessment & Plan Adjustment");
                 if (reassessmentStaticData?.chatChips) {
                     chips = reassessmentStaticData.chatChips;
                 }
@@ -3212,13 +3247,13 @@ function parseAiResponseToCards(jsonString: string) {
             relatedCardId: card.id,
             activatedByOptionId: card.activatedByOptionId
         }));
-        
+
         roadmapSteps = newRoadmapSteps;
         detailedCards = newDetailedCards.filter(c => c.type !== 'option-best' && c.type !== 'option-other');
         completedDetailedCards = [];
         archivedCards = [];
         selectedOptionForDecision = {};
-        
+
     } catch (error) {
         console.error("Failed to parse AI response:", error);
         console.error("Raw response:", jsonString);
@@ -3228,10 +3263,10 @@ function parseAiResponseToCards(jsonString: string) {
 
 async function callGeminiForChat(card: DetailedCardData | StaticGuideCardData, userQuery: string): Promise<string> {
     if (!ai) throw new Error("AI Client not initialized.");
-    
+
     const cardContentText = stripHtml(card.content);
     const previousChat = (card.chatHistory || []).map(msg => `${msg.sender}: ${msg.text}`).join('\n');
-    
+
     // Check if this is a "Reassessment" chat
     const isReassessment = card.title === "Reassessment & Plan Adjustment";
     let projectContext = '';
@@ -3304,7 +3339,7 @@ Example:
         contents: `Break down the task: "${card.title}"`,
         config: { systemInstruction }
     });
-    
+
     return response.text;
 }
 
@@ -3331,7 +3366,7 @@ Generate a single, clear, and effective prompt that the user can copy and paste 
 
 async function callGeminiForTool(toolTitle: string, input: string, projectContext?: string): Promise<string> {
     if (!ai) throw new Error("AI Client not initialized.");
-    
+
     let systemInstruction = '';
     let prompt = input;
 
@@ -3365,19 +3400,19 @@ Start the diagram with \`graph TD\`.`;
         contents: prompt,
         config: { systemInstruction }
     });
-    
+
     // For mermaid, we need to extract the code from the block
     if (toolTitle === "Mermaid Diagram Builder") {
         const match = response.text.match(/```mermaid\n([\s\S]*?)```/);
         return match ? match[1] : 'graph TD\n  A[Error generating diagram]';
     }
-    
+
     return response.text;
 }
 
 async function callGeminiForGitHubTool(action: string, input: string): Promise<string> {
     if (!ai) throw new Error("AI Client not initialized.");
-    
+
     let systemInstruction = '';
     let prompt = input;
 
@@ -3403,13 +3438,13 @@ async function callGeminiForGitHubTool(action: string, input: string): Promise<s
         contents: prompt,
         config: { systemInstruction }
     });
-    
+
     return response.text;
 }
 
 async function callGeminiForSandbox(prompt: string): Promise<SandboxCode> {
     if (!ai) throw new Error("AI Client not initialized.");
-    
+
     const systemInstruction = `You are an expert frontend web developer. Your task is to generate the complete, self-contained HTML, CSS, and JavaScript code for a simple web application based on a user's prompt.
 
 The output MUST be a single, valid JSON object. Do not include any text, markdown, or code formatting like \`\`\`json before or after the JSON object.
@@ -3447,7 +3482,7 @@ The generated code must be simple, functional, and not rely on any external libr
 
 async function callGeminiForClarification(conversationHistory: string): Promise<string> {
     if (!ai) throw new Error("AI Client not initialized.");
-    
+
     const systemInstruction = `You are an AI project planner. A user has given you a project description. Your job is to ask a few (2-3 max) critical, clarifying questions to better understand the project scope before you generate a detailed deployment plan.
 Focus on questions that would significantly change the plan, such as:
 - The need for user accounts (authentication).
@@ -3462,7 +3497,7 @@ Keep your response conversational and end by asking the user to provide more det
         contents: conversationHistory,
         config: { systemInstruction }
     });
-    
+
     return response.text;
 }
 
@@ -3470,6 +3505,7 @@ Keep your response conversational and end by asking the user to provide more det
 
 // --- Initialization ---
 function init() {
+    initAI(process.env.GEMINI_API_KEY || "");
     loadStateFromLocalStorage();
     updateView('launchpad');
 }

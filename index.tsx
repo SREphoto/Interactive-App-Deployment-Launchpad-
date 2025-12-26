@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { marked } from "marked";
+import { GoogleGenAI } from "@google/genai";
 import {
     GUIDE_VERSION,
     GUIDE_LAST_UPDATED,
@@ -909,7 +910,7 @@ let toastTimeoutId: number | null = null;
 let isLoadingAiResponse = false;
 let globalAiError: string | null = null;
 
-const API_KEY = process.env.API_KEY;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 let ai: GoogleGenAI | null = null;
 declare var hljs: any;
 
@@ -3505,7 +3506,7 @@ Keep your response conversational and end by asking the user to provide more det
 
 // --- Initialization ---
 function init() {
-    initAI(process.env.GEMINI_API_KEY || "");
+    initAI(API_KEY || "");
     loadStateFromLocalStorage();
     updateView('launchpad');
 }

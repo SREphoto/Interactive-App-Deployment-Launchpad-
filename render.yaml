@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: interactive-app-deployment-launchpad
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_GEMINI_API_KEY
+        sync: false
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=31536000
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

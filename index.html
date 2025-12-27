@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Launchpad & Deployment Guide</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+  <script type="importmap">
+{
+  "imports": {
+    "marked": "https://esm.sh/marked@^15.0.12",
+    "openai": "https://esm.sh/openai@^5.1.1",
+    "@google/genai": "https://esm.sh/@google/genai@^1.4.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/Interactive-App-Deployment-Launchpad-/assets/index-CtWbVGgp.js"></script>
+  <link rel="stylesheet" crossorigin href="/Interactive-App-Deployment-Launchpad-/assets/index-CkygBadE.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <!-- Logo Removed -->
+      <h1>AI Studio Launch Assistant <span id="app-version" class="version-badge"
+          style="font-size: 0.5em; vertical-align: middle; cursor: pointer; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px;">v1.0.0</span>
+      </h1>
+      <nav>
+        <a href="#" id="nav-launchpad" class="active">Home</a>
+        <a href="#" id="nav-guide">Guide</a>
+        <a href="#" id="nav-tools">Tools</a>
+      </nav>
+    </div>
+  </header>
+  <main id="app-container">
+    <!-- Content will be rendered here by index.tsx -->
+  </main>
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+    <p>Generating your launch plan...</p>
+  </div>
+  <button id="scroll-to-top-btn" class="scroll-to-top-btn" title="Go to top"
+    aria-label="Scroll to top of the page">▲</button>
+  <div id="undo-toast" class="undo-toast" role="status" aria-live="polite"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</body>
+
+</html>

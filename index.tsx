@@ -46,14 +46,7 @@ declare var hljs: any;
 declare var mermaid: any;
 
 // --- AI Launchpad Types and State ---
-[toolTitle: string]: {
-    input: string;
-    output: string;
-    isLoading: boolean;
-    error: string | null;
-    useProjectContext: boolean;
-}
-}
+
 
 const CURRENT_VERSION = "v1.0.0";
 const CHANGELOG = [

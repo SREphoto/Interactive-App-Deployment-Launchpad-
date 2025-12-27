@@ -68,6 +68,26 @@ body {
     overflow-x: hidden;
 }
 
+/* Legend Swatches */
+.legend-swatch {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 8px;
+    vertical-align: middle;
+    box-shadow: 0 0 5px currentColor;
+}
+
+.legend-swatch.type-step { background-color: var(--card-color-step); box-shadow: 0 0 5px var(--card-color-step); }
+.legend-swatch.type-decision { background-color: var(--card-color-decision); box-shadow: 0 0 5px var(--card-color-decision); }
+.legend-swatch.type-option-best { background-color: var(--card-color-option-best); box-shadow: 0 0 5px var(--card-color-option-best); }
+.legend-swatch.type-option-other { background-color: var(--card-color-option-other); box-shadow: 0 0 5px var(--card-color-option-other); }
+.legend-swatch.type-warning { background-color: var(--card-color-warning); box-shadow: 0 0 5px var(--card-color-warning); }
+.legend-swatch.completed { background-color: var(--card-color-completed); box-shadow: 0 0 5px var(--card-color-completed); }
+.legend-swatch.archived { background-color: var(--card-color-archived); box-shadow: 0 0 5px var(--card-color-archived); }
+
+
 /* Animated Background */
 body::before {
     content: '';

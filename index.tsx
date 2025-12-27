@@ -105,6 +105,7 @@ declare var hljs: any;
 
 if (API_KEY) {
     try {
+        initAI(API_KEY);
         ai = new GoogleGenAI({ apiKey: API_KEY });
     } catch (error) {
         console.error("Failed to initialize GoogleGenAI:", error);

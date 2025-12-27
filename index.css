@@ -1422,3 +1422,143 @@ a:hover {
         margin-right: 20px;
     }
 }
+
+/* Changelog Modal & Version Badge */
+.version-badge {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--color-primary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 10px;
+    cursor: pointer;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.version-badge:hover {
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    box-shadow: 0 0 15px var(--color-primary-glow);
+}
+
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.custom-modal-content {
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg), var(--shadow-glow-primary);
+    animation: slideIn 0.3s ease-out;
+}
+
+.custom-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    padding: 0;
+    border: none;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    width: auto;
+    height: auto;
+}
+
+.close-modal-btn:hover {
+    color: var(--color-primary);
+    transform: none;
+    background: transparent;
+}
+
+.custom-modal-body {
+    padding: 25px;
+    overflow-y: auto;
+}
+
+.changelog-item {
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 15px;
+}
+
+.changelog-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.changelog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.changelog-version {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+.changelog-date {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.changelog-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.changelog-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    color: var(--color-text-primary);
+}
+
+.changelog-list li::before {
+    content: '•';
+    color: var(--color-primary);
+    position: absolute;
+    left: 0;
+    top: 0;
+}

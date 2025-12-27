@@ -1592,9 +1592,14 @@ function attachAllEventListeners() {
     hljs.configure({ ignoreUnescapedHTML: true });
 
     // Nav links are now handled by onclick in renderHeader, but we still need to attach other global listeners
-    // navLaunchpad.addEventListener('click', (e) => { e.preventDefault(); updateView('launchpad'); }); // Handled by renderHeader
-    // navGuide.addEventListener('click', (e) => { e.preventDefault(); updateView('guide'); }); // Handled by renderHeader
-    // navTools.addEventListener('click', (e) => { e.preventDefault(); updateView('tools'); }); // Handled by renderHeader
+    // Navigation Listeners (Restored for Static Header)
+    const navLaunchpad = document.getElementById('nav-launchpad');
+    const navGuide = document.getElementById('nav-guide');
+    const navTools = document.getElementById('nav-tools');
+
+    if (navLaunchpad) navLaunchpad.addEventListener('click', (e) => { e.preventDefault(); updateView('launchpad'); });
+    if (navGuide) navGuide.addEventListener('click', (e) => { e.preventDefault(); updateView('guide'); });
+    if (navTools) navTools.addEventListener('click', (e) => { e.preventDefault(); updateView('tools'); });
 
     // Version Click
     const versionBadge = document.getElementById('app-version');

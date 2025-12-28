@@ -293,6 +293,53 @@ The generated code must be simple, functional, and not rely on any external libr
     }
 });
 
+// 9. Sandbox Iterative Edit
+app.post('/api/sandbox-edit', async (req, res) => {
+    try {
+        const { currentHtml, currentCss, currentJs, userPrompt } = req.body;
+
+        const systemInstruction = `You are an expert frontend web developer acting as an intelligent code editor.
+Your task is to MODIFY the provided HTML, CSS, and JavaScript based on the User's Request.
+
+Input Context:
+- You will be given the CURRENT state of three files: index.html, style.css, and script.js.
+- You will be given a User Request describing the change (e.g., "Make the background blue", "Fix the bug", "Add a reset button").
+
+Output Requirements:
+- You must return a single JSON object containing the COMPLETE, UPDATED content for all three files.
+- Keys: "html", "css", "js".
+- Do not output markdown. Do not output explanations. ONLY the JSON object.
+- If a file does not need changes, return its content exactly as is.
+- Ensure the code remains functional and self-contained.`;
+
+        const fullPrompt = `
+CURRENT HTML:
+${currentHtml}
+
+CURRENT CSS:
+${currentCss}
+
+CURRENT JS:
+${currentJs}
+
+USER REQUEST:
+${userPrompt}
+`;
+
+        if (!ai) throw new Error("AI Client not initialized.");
+        const result = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: fullPrompt,
+            config: { systemInstruction, responseMimeType: "application/json" }
+        });
+
+        res.json({ text: result.text });
+    } catch (error) {
+        console.error("API /api/sandbox-edit error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Catch-all for SPA client-side routing
 app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));

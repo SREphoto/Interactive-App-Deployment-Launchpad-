@@ -111,3 +111,30 @@ export async function callGeminiForSandbox(prompt: string): Promise<SandboxCode>
         throw new Error("Invalid sandbox response from server");
     }
 }
+
+export async function callGeminiForSandboxEdit(
+    currentHtml: string,
+    currentCss: string,
+    currentJs: string,
+    userPrompt: string
+): Promise<SandboxCode> {
+    const response = await fetch('/api/sandbox-edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentHtml, currentCss, currentJs, userPrompt })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Sandbox edit failed');
+
+    try {
+        const parsed = JSON.parse(data.text);
+        if (typeof parsed.html === 'string' && typeof parsed.css === 'string' && typeof parsed.js === 'string') {
+            return parsed as SandboxCode;
+        } else {
+            throw new Error("AI response format invalid");
+        }
+    } catch (e) {
+        console.error("Failed to parse sandbox JSON from server:", e);
+        throw new Error("Invalid sandbox response from server");
+    }
+}

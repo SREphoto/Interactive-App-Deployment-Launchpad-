@@ -1134,27 +1134,37 @@ function renderSandboxTool(): string {
             </div>
         </div>
         <div class="sandbox-container">
-            <div class="sandbox-panes">
-                <div class="sandbox-pane">
-                    <div class="sandbox-pane-header">
-                        <label for="sandbox-html">HTML</label>
-                        <button class="copy-code-btn" data-copy-target="sandbox-html" title="Copy HTML code">Copy</button>
-                    </div>
-                    <textarea id="sandbox-html" class="sandbox-editor" spellcheck="false" aria-label="HTML code editor">${sandboxState.html}</textarea>
+            <div class="sandbox-editor">
+                <!-- HTML Editor -->
+                <div class="editor-header">
+                    <div class="editor-tab active"><span style="color: #E34C26">html</span> index.html</div>
                 </div>
-                <div class="sandbox-pane">
-                    <div class="sandbox-pane-header">
-                        <label for="sandbox-css">CSS</label>
-                        <button class="copy-code-btn" data-copy-target="sandbox-css" title="Copy CSS code">Copy</button>
-                    </div>
-                    <textarea id="sandbox-css" class="sandbox-editor" spellcheck="false" aria-label="CSS code editor">${sandboxState.css}</textarea>
+                <textarea id="sandbox-html" spellcheck="false" placeholder="<!-- HTML goes here -->" style="height: 150px; border-bottom: 1px solid #333">${sandboxState.html}</textarea>
+
+                <!-- CSS Editor -->
+                <div class="editor-header">
+                    <div class="editor-tab active"><span style="color: #264de4">css</span> style.css</div>
                 </div>
-                <div class="sandbox-pane">
-                    <div class="sandbox-pane-header">
-                        <label for="sandbox-js">JavaScript</label>
-                        <button class="copy-code-btn" data-copy-target="sandbox-js" title="Copy JavaScript code">Copy</button>
-                    </div>
-                    <textarea id="sandbox-js" class="sandbox-editor" spellcheck="false" aria-label="JavaScript code editor">${sandboxState.js}</textarea>
+                <textarea id="sandbox-css" spellcheck="false" placeholder="/* CSS goes here */" style="height: 150px; border-bottom: 1px solid #333">${sandboxState.css}</textarea>
+
+                <!-- JS Editor -->
+                <div class="editor-header">
+                    <div class="editor-tab active"><span style="color: #F7DF1E">js</span> script.js</div>
+                </div>
+                <textarea id="sandbox-js" spellcheck="false" placeholder="// JavaScript goes here" style="height: 150px;">${sandboxState.js}</textarea>
+            </div>
+
+            <!-- Preview Column -->
+            <div class="sandbox-preview">
+                <div class="browser-bar">
+                   <div class="browser-dots">
+                       <div class="browser-dot red"></div>
+                       <div class="browser-dot yellow"></div>
+                       <div class="browser-dot green"></div>
+                   </div>
+                   <div class="browser-url">http://localhost:3000/app-preview</div>
+                </div>
+                <iframe id="sandbox-preview-frame" title="App Preview">
                 </div>
             </div>
             <div class="sandbox-controls">

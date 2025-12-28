@@ -1,6 +1,6 @@
 
 export type CardType = 'step' | 'decision' | 'option-best' | 'option-other' | 'warning';
-export type AppView = 'launchpad' | 'guide' | 'tools';
+export type AppView = 'launchpad' | 'guide' | 'tools' | 'sandbox';
 export type ProjectInputMode = 'describe' | 'url' | 'code';
 
 export interface SubStep {
@@ -61,15 +61,15 @@ export interface DetailedCardData {
 }
 
 export interface SandboxState {
-    html: string;
-    css: string;
-    js: string;
+  html: string;
+  css: string;
+  js: string;
 }
 
 export interface SandboxCode {
-    html: string;
-    css: string;
-    js: string;
+  html: string;
+  css: string;
+  js: string;
 }
 
 export interface RoadmapStep {
@@ -83,24 +83,24 @@ export interface RoadmapStep {
 }
 
 export interface ApplicationState {
-    projectDescription: string;
-    projectUrl: string;
-    projectCode: string;
-    inputMode: ProjectInputMode;
-    roadmapSteps: RoadmapStep[];
-    detailedCards: DetailedCardData[];
-    completedDetailedCards: DetailedCardData[];
-    archivedCards: DetailedCardData[];
-    selectedOptionForDecision: { [decisionCardId: string]: string | null };
-    sandboxState: SandboxState;
+  projectDescription: string;
+  projectUrl: string;
+  projectCode: string;
+  inputMode: ProjectInputMode;
+  roadmapSteps: RoadmapStep[];
+  detailedCards: DetailedCardData[];
+  completedDetailedCards: DetailedCardData[];
+  archivedCards: DetailedCardData[];
+  selectedOptionForDecision: { [decisionCardId: string]: string | null };
+  sandboxState: SandboxState;
 }
 
 export interface ToolState {
-    [toolTitle: string]: {
-        input: string;
-        output: string;
-        isLoading: boolean;
-        error: string | null;
-        useProjectContext: boolean;
-    }
+  [toolTitle: string]: {
+    input: string;
+    output: string;
+    isLoading: boolean;
+    error: string | null;
+    useProjectContext: boolean;
+  }
 }

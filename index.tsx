@@ -1120,21 +1120,11 @@ function renderToolsView() {
 function renderSandboxTool(): string {
     const sandboxToolState = toolStates["Live Code Sandbox"] || { input: '', output: '', isLoading: false, error: null, useProjectContext: false };
     return `
-         <div class="sandbox-ai-generator">
-            <h4>Build with AI</h4>
-            <p>Describe a simple app you want to build (e.g., "a calculator", "a to-do list", "a digital clock"), and the AI will generate the code for you.</p>
-            <form id="sandbox-ai-form">
-                <label for="sandbox-ai-input" class="sr-only">Describe the app to build</label>
-                <textarea id="sandbox-ai-input" class="tool-input" placeholder="e.g., build a simple calculator with add, subtract, multiply, and divide functions" rows="3" ${sandboxToolState.isLoading ? 'disabled' : ''}>${sandboxToolState.input || ''}</textarea>
-                <button type="submit" class="action-btn" ${sandboxToolState.isLoading ? 'disabled' : ''}>Generate App</button>
-            </form>
-            <div id="sandbox-ai-status">
-                 ${sandboxToolState.isLoading ? '<div class="card-loading small-spinner">AI is building...</div>' : ''}
-                 ${sandboxToolState.error ? `<div class="error-message">${sandboxToolState.error}</div>` : ''}
-            </div>
+        <div class="ide-controls">
+            <button class="ide-toggle-btn active" data-pane="chat" title="Toggle Chat">Chat</button>
+            <button class="ide-toggle-btn active" data-pane="editor" title="Toggle Code">Code</button>
+            <button class="ide-toggle-btn active" data-pane="preview" title="Toggle Preview">Preview</button>
         </div>
-    return `
-        < div class="ide-controls" >
             <button class="ide-toggle-btn active" data-pane="chat" title="Toggle Chat">Chat</button>
             <button class="ide-toggle-btn active" data-pane="editor" title="Toggle Code">Code</button>
             <button class="ide-toggle-btn active" data-pane="preview" title="Toggle Preview">Preview</button>
@@ -1187,8 +1177,8 @@ function renderSandboxTool(): string {
             </div>
         </div>
     `;
-                </div>
-            </div>
+                </div >
+            </div >
             <div class="sandbox-controls">
                 <button id="use-code-for-plan-btn" class="action-btn info-btn" title="Use the HTML, CSS, and JS below to generate a new plan in the AI Launchpad.">Use Code for Plan</button>
                 <button id="run-sandbox-btn" class="action-btn">Run</button>
@@ -1197,13 +1187,13 @@ function renderSandboxTool(): string {
                 <label>Preview</label>
                 <iframe id="sandbox-preview" title="Live Code Preview" sandbox="allow-scripts"></iframe>
             </div>
-        </div>
-    `;
+        </div >
+        `;
 }
 
 function renderFileManagerTool(): string {
     return `
-        <div class="file-manager-container">
+        < div class="file-manager-container" >
             <div class="file-upload-local">
                 <h4>From Computer</h4>
                 <label for="file-upload-input" class="button-like-label action-btn">Select Files</label>
@@ -1216,13 +1206,13 @@ function renderFileManagerTool(): string {
                 <button id="connect-drive-btn" class="action-btn">Connect to Google Drive</button>
                 <p class="drive-note">This would open the Google Drive Picker in a real application.</p>
             </div>
-        </div>
-    `;
+        </div >
+        `;
 }
 
 function renderHeader(): string {
     return `
-    <header>
+        < header >
         <div class="header-content">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <h1>AI Studio Launch Assistant</h1>
@@ -1235,15 +1225,15 @@ function renderHeader(): string {
             </nav>
             <button class="action-btn header-action-btn" onclick="resetApp()">Reset App</button>
         </div>
-    </header>
-    `;
+    </header >
+        `;
 }
 
 function renderChangelogModal(): string {
     if (!isChangelogOpen) return '';
 
     const changelogItems = CHANGELOG.map(log => `
-        <div class="changelog-item">
+        < div class="changelog-item" >
             <div class="changelog-header">
                 <span class="changelog-version">${log.version}</span>
                 <span class="changelog-date">${log.date}</span>
@@ -1251,11 +1241,11 @@ function renderChangelogModal(): string {
             <ul class="changelog-list">
                 ${log.changes.map(change => `<li>${change}</li>`).join('')}
             </ul>
-        </div>
-    `).join('');
+        </div >
+        `).join('');
 
     return `
-        <div class="custom-modal-overlay" onclick="closeChangelog(event)">
+        < div class="custom-modal-overlay" onclick = "closeChangelog(event)" >
             <div class="custom-modal-content">
                 <div class="custom-modal-header">
                     <h2>Changelog</h2>
@@ -1265,8 +1255,8 @@ function renderChangelogModal(): string {
                     ${changelogItems}
                 </div>
             </div>
-        </div>
-    `;
+        </div >
+        `;
 }
 
 // --- Main View Rendering ---
@@ -1279,10 +1269,10 @@ function renderApp() {
     // For now, using the existing render functions and wrapping them.
     if (isClarifying) {
         // mainContentHtml = renderClarificationView(); // Placeholder
-        mainContentHtml = `<section id="clarification-section" class="launchpad-section" aria-labelledby="clarification-heading">
+        mainContentHtml = `< section id = "clarification-section" class="launchpad-section" aria - labelledby="clarification-heading" >
             <h2 id="clarification-heading">2. Confirm Project Scope</h2>
             <p>Clarification view content goes here.</p>
-        </section>`;
+        </section > `;
     } else if (currentView === 'launchpad') {
         // mainContentHtml = renderLaunchpadView(); // Placeholder
         // The existing renderLaunchpad() function already renders the full content, so we need to adjust how renderApp works.
@@ -1299,9 +1289,9 @@ function renderApp() {
     // The actual content rendering will still be handled by renderLaunchpad, renderGuide, renderTools.
 
     appContainer.innerHTML = `
-        ${renderHeader()}
-        ${renderChangelogModal()}
-        <div id="main-content-wrapper"></div>
+        ${ renderHeader() }
+        ${ renderChangelogModal() }
+    <div id="main-content-wrapper"></div>
     `;
 
     // Re-attach event listeners after rendering
@@ -1320,37 +1310,37 @@ function renderToolCard(cardData: StaticGuideCardData) {
 
     if (cardData.title === "Live Code Sandbox") {
         return `
-            <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
-                <details open>
-                    <summary>
-                        <span class="card-title">${cardData.title}</span>
-                    </summary>
-                    <div class="card-content">
-                        ${cardData.content}
-                        <div class="tool-card-container">
-                            ${renderSandboxTool()}
-                        </div>
+        < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
+            <details open>
+                <summary>
+                    <span class="card-title">${cardData.title}</span>
+                </summary>
+                <div class="card-content">
+                    ${cardData.content}
+                    <div class="tool-card-container">
+                        ${renderSandboxTool()}
                     </div>
-                </details>
-            </section>
+                </div>
+            </details>
+            </section >
         `;
     }
 
     if (cardData.title === "Project File Manager") {
         return `
-            <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
-                <details>
-                     <summary>
-                        <span class="card-title">${cardData.title}</span>
-                    </summary>
-                    <div class="card-content">
-                        ${cardData.content}
-                        <div class="tool-card-container">
-                            ${renderFileManagerTool()}
-                        </div>
+        < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
+            <details>
+                <summary>
+                    <span class="card-title">${cardData.title}</span>
+                </summary>
+                <div class="card-content">
+                    ${cardData.content}
+                    <div class="tool-card-container">
+                        ${renderFileManagerTool()}
                     </div>
-                </details>
-            </section>
+                </div>
+            </details>
+            </section >
         `;
     }
 
@@ -1364,29 +1354,29 @@ function renderToolCard(cardData: StaticGuideCardData) {
     let outputHtml = '';
     if (toolState.output) {
         if (cardData.title === "Mermaid Diagram Builder") {
-            outputHtml = `<div class="mermaid-diagram" id="mermaid-output-container-${toolTitleId}">${toolState.output}</div>`;
+            outputHtml = `< div class="mermaid-diagram" id = "mermaid-output-container-${toolTitleId}" > ${ toolState.output }</div > `;
         } else {
             outputHtml = sanitizeHtml(marked.parse(toolState.output) as string);
         }
     }
 
     const isContextAware = cardData.title === "PRD Generator" || cardData.title === "MVP Feature Scoper";
-    const contextCheckboxId = `context-checkbox-${toolTitleId}`;
+    const contextCheckboxId = `context - checkbox - ${ toolTitleId } `;
     const contextCheckboxHtml = isContextAware ? `
-        <div class="tool-context-toggle">
+        < div class="tool-context-toggle" >
             <input type="checkbox" id="${contextCheckboxId}" data-tool-title="${cardData.title}" ${toolState.useProjectContext ? 'checked' : ''} ${roadmapSteps.length === 0 ? 'disabled' : ''}>
-            <label for="${contextCheckboxId}">Use Project Context from AI Launchpad</label>
-            ${roadmapSteps.length === 0 ? '<span class="context-disabled-note">(Generate a plan in AI Launchpad first)</span>' : ''}
-        </div>
+                <label for="${contextCheckboxId}">Use Project Context from AI Launchpad</label>
+                ${roadmapSteps.length === 0 ? '<span class="context-disabled-note">(Generate a plan in AI Launchpad first)</span>' : ''}
+            </div>
     ` : '';
 
-    const outputId = `tool-output-${toolTitleId}`;
+    const outputId = `tool - output - ${ toolTitleId } `;
 
     return `
-        <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
+        < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
             <details>
                 <summary>
-                     <span class="card-title">${cardData.title}</span>
+                    <span class="card-title">${cardData.title}</span>
                 </summary>
                 <div class="card-content">
                     ${cardData.content}
@@ -1407,8 +1397,8 @@ function renderToolCard(cardData: StaticGuideCardData) {
                     ` : ''}
                 </div>
             </details>
-        </section>
-    `;
+        </section >
+        `;
 }
 
 
@@ -1420,8 +1410,8 @@ function updateView(newView?: AppView) {
     // Render the header and changelog modal first
     // Render the header (handled by static HTML) and changelog modal
     appContainer.innerHTML = `
-        ${renderChangelogModal()}
-        <div id="main-content-area"></div>
+        ${ renderChangelogModal() }
+    <div id="main-content-area"></div>
     `;
 
     const mainContentArea = document.getElementById('main-content-area') as HTMLElement;
@@ -1429,128 +1419,128 @@ function updateView(newView?: AppView) {
     // Then render the specific view content into the main content area
     if (currentView === 'launchpad') {
         mainContentArea.innerHTML = `
-            <div class="welcome-container">
-                <div class="welcome-content">
-                    <h1>Welcome to the AI Studio Launch Assistant</h1>
-                    <p>Your comprehensive guide to launching and deploying AI-powered applications.</p>
-                </div>
+        < div class="welcome-container" >
+            <div class="welcome-content">
+                <h1>Welcome to the AI Studio Launch Assistant</h1>
+                <p>Your comprehensive guide to launching and deploying AI-powered applications.</p>
             </div>
-            <div class="launchpad-layout">
-                <div class="launchpad-main-content">
-                    <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
-                        <h2 id="project-input-heading">1. Describe Your AI Studio Project</h2>
-                        <div class="input-mode-tabs" role="tablist" aria-labelledby="project-input-heading">
-                            <button id="tab-describe" class="tab-btn ${projectInputMode === 'describe' ? 'active' : ''}" data-mode="describe" role="tab" aria-selected="${projectInputMode === 'describe'}" aria-controls="describe-content">Describe</button>
-                            <button id="tab-url" class="tab-btn ${projectInputMode === 'url' ? 'active' : ''}" data-mode="url" role="tab" aria-selected="${projectInputMode === 'url'}" aria-controls="url-content">From URL</button>
-                            <button id="tab-code" class="tab-btn ${projectInputMode === 'code' ? 'active' : ''}" data-mode="code" role="tab" aria-selected="${projectInputMode === 'code'}" aria-controls="code-content">From Code</button>
+            </div >
+        <div class="launchpad-layout">
+            <div class="launchpad-main-content">
+                <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
+                    <h2 id="project-input-heading">1. Describe Your AI Studio Project</h2>
+                    <div class="input-mode-tabs" role="tablist" aria-labelledby="project-input-heading">
+                        <button id="tab-describe" class="tab-btn ${projectInputMode === 'describe' ? 'active' : ''}" data-mode="describe" role="tab" aria-selected="${projectInputMode === 'describe'}" aria-controls="describe-content">Describe</button>
+                        <button id="tab-url" class="tab-btn ${projectInputMode === 'url' ? 'active' : ''}" data-mode="url" role="tab" aria-selected="${projectInputMode === 'url'}" aria-controls="url-content">From URL</button>
+                        <button id="tab-code" class="tab-btn ${projectInputMode === 'code' ? 'active' : ''}" data-mode="code" role="tab" aria-selected="${projectInputMode === 'code'}" aria-controls="code-content">From Code</button>
+                    </div>
+                    <form id="project-description-form">
+                        <div id="describe-content" style="display: ${projectInputMode === 'describe' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-describe">
+                            <label for="project-description" class="sr-only">Project Description</label>
+                            <textarea id="project-description" name="project-description" placeholder="E.g., 'A chatbot for customer service that uses a specific knowledge base about electronics', 'An image generator for creating fantasy art', 'A simple game where the AI is the opponent'..." ${projectInputMode === 'describe' ? 'required' : ''} rows="5" aria-required="${projectInputMode === 'describe'}">${currentProjectDescription}</textarea>
                         </div>
-                        <form id="project-description-form">
-                            <div id="describe-content" style="display: ${projectInputMode === 'describe' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-describe">
-                                <label for="project-description" class="sr-only">Project Description</label>
-                                <textarea id="project-description" name="project-description" placeholder="E.g., 'A chatbot for customer service that uses a specific knowledge base about electronics', 'An image generator for creating fantasy art', 'A simple game where the AI is the opponent'..." ${projectInputMode === 'describe' ? 'required' : ''} rows="5" aria-required="${projectInputMode === 'describe'}">${currentProjectDescription}</textarea>
-                            </div>
-                            <div id="url-content" style="display: ${projectInputMode === 'url' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-url">
-                                <label for="project-url" class="sr-only">Project Website URL</label>
-                                <input type="url" id="project-url" name="project-url" placeholder="https://example.com" value="${currentProjectUrl}" ${projectInputMode === 'url' ? 'required' : ''} aria-required="${projectInputMode === 'url'}" />
-                            </div>
-                            <div id="code-content" style="display: ${projectInputMode === 'code' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-code">
-                                <label for="project-code" class="sr-only">Paste Your Code</label>
-                                <textarea id="project-code" name="project-code" placeholder="Paste your relevant code here (e.g., main component, server file)..." ${projectInputMode === 'code' ? 'required' : ''} rows="10" aria-required="${projectInputMode === 'code'}">${currentProjectCode}</textarea>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" id="generate-plan-btn">${isClarifying ? 'Start Over' : 'Analyze & Discuss'}</button>
-                                <label for="upload-plan-input" class="button-like-label action-btn" role="button" tabindex="0" aria-controls="upload-plan-input">Upload Plan (.json)</label>
-                                <input type="file" id="upload-plan-input" accept=".json" class="sr-only">
-                            </div>
-                        </form>
-                        <div id="global-ai-error-message" class="error-message" style="display: ${globalAiError ? 'block' : 'none'};" role="alert" aria-live="assertive">${globalAiError || ''}</div>
-                    </section>
-                    
-                    <section id="clarification-section" class="launchpad-section" style="display: ${isClarifying ? 'block' : 'none'};" aria-labelledby="clarification-heading">
-                        <h2 id="clarification-heading">2. Confirm Project Scope</h2>
-                        <div class="clarification-chat-container">
-                            <div class="chat-history">
-                                ${(clarificationChatHistory || []).map(msg => `
+                        <div id="url-content" style="display: ${projectInputMode === 'url' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-url">
+                            <label for="project-url" class="sr-only">Project Website URL</label>
+                            <input type="url" id="project-url" name="project-url" placeholder="https://example.com" value="${currentProjectUrl}" ${projectInputMode === 'url' ? 'required' : ''} aria-required="${projectInputMode === 'url'}" />
+                        </div>
+                        <div id="code-content" style="display: ${projectInputMode === 'code' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-code">
+                            <label for="project-code" class="sr-only">Paste Your Code</label>
+                            <textarea id="project-code" name="project-code" placeholder="Paste your relevant code here (e.g., main component, server file)..." ${projectInputMode === 'code' ? 'required' : ''} rows="10" aria-required="${projectInputMode === 'code'}">${currentProjectCode}</textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="generate-plan-btn">${isClarifying ? 'Start Over' : 'Analyze & Discuss'}</button>
+                            <label for="upload-plan-input" class="button-like-label action-btn" role="button" tabindex="0" aria-controls="upload-plan-input">Upload Plan (.json)</label>
+                            <input type="file" id="upload-plan-input" accept=".json" class="sr-only">
+                        </div>
+                    </form>
+                    <div id="global-ai-error-message" class="error-message" style="display: ${globalAiError ? 'block' : 'none'};" role="alert" aria-live="assertive">${globalAiError || ''}</div>
+                </section>
+
+                <section id="clarification-section" class="launchpad-section" style="display: ${isClarifying ? 'block' : 'none'};" aria-labelledby="clarification-heading">
+                    <h2 id="clarification-heading">2. Confirm Project Scope</h2>
+                    <div class="clarification-chat-container">
+                        <div class="chat-history">
+                            ${(clarificationChatHistory || []).map(msg => `
                                     <div class="chat-message ${msg.sender}">
                                         <strong>${msg.sender === 'user' ? 'You' : 'AI'}:</strong> ${sanitizeHtml(marked.parse(msg.text) as string)}
                                     </div>
                                 `).join('')}
-                            </div>
-                            ${isClarificationLoading ? '<div class="card-loading small-spinner">AI is thinking...</div>' : ''}
-                            <form id="clarification-chat-form" class="in-card-chat-form">
-                                <label for="clarification-chat-input" class="sr-only">Respond to AI</label>
-                                <textarea id="clarification-chat-input" class="chat-input" placeholder="Your response..." rows="2" aria-label="Respond to AI to clarify project details">${currentClarificationQuery}</textarea>
-                                <button type="submit" class="action-btn ask-ai-btn" ${isClarificationLoading ? 'disabled' : ''}>Send</button>
-                            </form>
                         </div>
-                        <div class="clarification-actions">
-                            <button id="generate-plan-from-convo-btn" class="action-btn" ${isClarificationLoading || clarificationChatHistory.length < 1 ? 'disabled' : ''}>Looks Good, Generate Plan</button>
-                        </div>
-                    </section>
+                        ${isClarificationLoading ? '<div class="card-loading small-spinner">AI is thinking...</div>' : ''}
+                        <form id="clarification-chat-form" class="in-card-chat-form">
+                            <label for="clarification-chat-input" class="sr-only">Respond to AI</label>
+                            <textarea id="clarification-chat-input" class="chat-input" placeholder="Your response..." rows="2" aria-label="Respond to AI to clarify project details">${currentClarificationQuery}</textarea>
+                            <button type="submit" class="action-btn ask-ai-btn" ${isClarificationLoading ? 'disabled' : ''}>Send</button>
+                        </form>
+                    </div>
+                    <div class="clarification-actions">
+                        <button id="generate-plan-from-convo-btn" class="action-btn" ${isClarificationLoading || clarificationChatHistory.length < 1 ? 'disabled' : ''}>Looks Good, Generate Plan</button>
+                    </div>
+                </section>
 
-                    <section class="launchpad-section" id="roadmap-section" aria-labelledby="roadmap-heading" style="display: ${!isClarifying && roadmapSteps.length > 0 ? 'block' : 'none'};">
-                        <h2 id="roadmap-heading">${isClarifying ? '3.' : '2.'} Your AI-Generated Launch Roadmap</h2>
-                        <div id="roadmap-overview" role="navigation" aria-label="Roadmap steps">
-                            ${renderRoadmapOverview()}
-                        </div>
-                    </section>
+                <section class="launchpad-section" id="roadmap-section" aria-labelledby="roadmap-heading" style="display: ${!isClarifying && roadmapSteps.length > 0 ? 'block' : 'none'};">
+                    <h2 id="roadmap-heading">${isClarifying ? '3.' : '2.'} Your AI-Generated Launch Roadmap</h2>
+                    <div id="roadmap-overview" role="navigation" aria-label="Roadmap steps">
+                        ${renderRoadmapOverview()}
+                    </div>
+                </section>
 
-                    <section class="launchpad-section" id="detailed-steps-section" aria-labelledby="detailed-steps-heading" style="display: ${!isClarifying && (detailedCards.length > 0 || completedDetailedCards.length > 0 || archivedCards.length > 0) ? 'block' : 'none'};">
-                        <h2 id="detailed-steps-heading">${isClarifying ? '4.' : '3.'} Detailed Steps & Guidance</h2>
-                        <div id="launchpad-search-container">
-                            <label for="launchpad-search-input" class="sr-only">Search Steps</label>
-                            <input type="search" id="launchpad-search-input" placeholder="Search steps..." value="${launchpadSearchQuery}">
-                        </div>
-                        <div id="detailed-cards-container">
-                            ${renderFilteredCards(detailedCards, 'active')}
-                        </div>
-                    </section>
+                <section class="launchpad-section" id="detailed-steps-section" aria-labelledby="detailed-steps-heading" style="display: ${!isClarifying && (detailedCards.length > 0 || completedDetailedCards.length > 0 || archivedCards.length > 0) ? 'block' : 'none'};">
+                    <h2 id="detailed-steps-heading">${isClarifying ? '4.' : '3.'} Detailed Steps & Guidance</h2>
+                    <div id="launchpad-search-container">
+                        <label for="launchpad-search-input" class="sr-only">Search Steps</label>
+                        <input type="search" id="launchpad-search-input" placeholder="Search steps..." value="${launchpadSearchQuery}">
+                    </div>
+                    <div id="detailed-cards-container">
+                        ${renderFilteredCards(detailedCards, 'active')}
+                    </div>
+                </section>
 
-                    <section class="launchpad-section" id="completed-roadmap-section" aria-labelledby="completed-roadmap-heading" style="display: ${!isClarifying && completedDetailedCards.length > 0 ? 'block' : 'none'};">
-                        <h2 id="completed-roadmap-heading">Completed Steps</h2>
-                        <div id="completed-cards-container">
-                            ${renderFilteredCards(completedDetailedCards, 'completed')}
-                        </div>
-                    </section>
+                <section class="launchpad-section" id="completed-roadmap-section" aria-labelledby="completed-roadmap-heading" style="display: ${!isClarifying && completedDetailedCards.length > 0 ? 'block' : 'none'};">
+                    <h2 id="completed-roadmap-heading">Completed Steps</h2>
+                    <div id="completed-cards-container">
+                        ${renderFilteredCards(completedDetailedCards, 'completed')}
+                    </div>
+                </section>
 
-                    <section class="launchpad-section" id="archived-items-section" aria-labelledby="archived-items-heading" style="display: ${!isClarifying && archivedCards.length > 0 ? 'block' : 'none'};">
-                        <h2 id="archived-items-heading">Archived Items</h2>
-                        <div id="archived-cards-container">
-                            ${renderFilteredCards(archivedCards, 'archived')}
-                        </div>
-                    </section>
-                </div>
-                <aside class="launchpad-sidebar">
-                    <section id="roadmap-minimap-section" class="launchpad-section sidebar-section" aria-labelledby="roadmap-minimap-heading">
-                        <h3 id="roadmap-minimap-heading">Roadmap Minimap</h3>
-                        <div id="roadmap-minimap-content">
-                            ${renderRoadmapMinimap()}
-                        </div>
-                    </section>
-                    <section id="decisions-made-section" class="launchpad-section sidebar-section" aria-labelledby="decisions-made-heading">
-                        <h3 id="decisions-made-heading">Decisions Made</h3>
-                        <div id="decisions-made-content">
-                            ${renderDecisionsMadeSidebar()}
-                        </div>
-                    </section>
-                    <section id="color-legend-section" class="launchpad-section sidebar-section" aria-labelledby="color-legend-heading">
-                        <h3 id="color-legend-heading">Legend</h3>
-                        <div id="color-legend-content">
-                            ${renderColorLegend()}
-                        </div>
-                    </section>
-                    <section id="plan-actions-section" class="launchpad-section sidebar-section" aria-labelledby="plan-actions-heading">
-                        <h3 id="plan-actions-heading">Plan Actions</h3>
-                        <div id="plan-actions-content" class="form-actions" style="flex-direction: column; align-items: stretch;">
-                            <button id="download-plan-btn" class="action-btn" ${roadmapSteps.length === 0 ? 'disabled' : ''}>Download Plan (.json)</button>
-                        </div>
-                    </section>
-                </aside>
+                <section class="launchpad-section" id="archived-items-section" aria-labelledby="archived-items-heading" style="display: ${!isClarifying && archivedCards.length > 0 ? 'block' : 'none'};">
+                    <h2 id="archived-items-heading">Archived Items</h2>
+                    <div id="archived-cards-container">
+                        ${renderFilteredCards(archivedCards, 'archived')}
+                    </div>
+                </section>
             </div>
-        `;
+            <aside class="launchpad-sidebar">
+                <section id="roadmap-minimap-section" class="launchpad-section sidebar-section" aria-labelledby="roadmap-minimap-heading">
+                    <h3 id="roadmap-minimap-heading">Roadmap Minimap</h3>
+                    <div id="roadmap-minimap-content">
+                        ${renderRoadmapMinimap()}
+                    </div>
+                </section>
+                <section id="decisions-made-section" class="launchpad-section sidebar-section" aria-labelledby="decisions-made-heading">
+                    <h3 id="decisions-made-heading">Decisions Made</h3>
+                    <div id="decisions-made-content">
+                        ${renderDecisionsMadeSidebar()}
+                    </div>
+                </section>
+                <section id="color-legend-section" class="launchpad-section sidebar-section" aria-labelledby="color-legend-heading">
+                    <h3 id="color-legend-heading">Legend</h3>
+                    <div id="color-legend-content">
+                        ${renderColorLegend()}
+                    </div>
+                </section>
+                <section id="plan-actions-section" class="launchpad-section sidebar-section" aria-labelledby="plan-actions-heading">
+                    <h3 id="plan-actions-heading">Plan Actions</h3>
+                    <div id="plan-actions-content" class="form-actions" style="flex-direction: column; align-items: stretch;">
+                        <button id="download-plan-btn" class="action-btn" ${roadmapSteps.length === 0 ? 'disabled' : ''}>Download Plan (.json)</button>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    `;
     } else if (currentView === 'guide') {
         mainContentArea.innerHTML = `
-            <h2 class="guide-main-heading">AI Application Deployment Guide</h2>
+        < h2 class="guide-main-heading" > AI Application Deployment Guide</h2 >
             <div class="guide-version-info">
                 Version: ${GUIDE_VERSION} | Last Updated: ${GUIDE_LAST_UPDATED}
             </div>
@@ -1561,14 +1551,14 @@ function updateView(newView?: AppView) {
             <div id="guide-cards-container">
                 ${filteredGuideData.length > 0 ? filteredGuideData.map(card => renderStaticGuideCard(card)).join('') : '<p id="no-guide-results">No guide sections found for your search.</p>'}
             </div>
-        `;
+    `;
     } else { // Tools view
         mainContentArea.innerHTML = `
-            <h2 class="guide-main-heading">Developer Tools</h2>
+        < h2 class="guide-main-heading" > Developer Tools</h2 >
             <div id="tools-container">
                 ${toolData.map(card => renderToolCard(card)).join('')}
             </div>
-        `;
+    `;
     }
 
     // Re-attach event listeners for the newly rendered content
@@ -1713,14 +1703,14 @@ function attachAllEventListeners() {
 
                 if (cardId) {
                     const card = findStaticCard(cardId);
-                    const inputEl = document.getElementById(`chat-input-${cardId}`) as HTMLTextAreaElement;
+                    const inputEl = document.getElementById(`chat - input - ${ cardId } `) as HTMLTextAreaElement;
 
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
                         inputEl.focus();
                         inputEl.style.height = 'auto';
-                        inputEl.style.height = `${inputEl.scrollHeight}px`;
+                        inputEl.style.height = `${ inputEl.scrollHeight } px`;
                     }
                 }
             }
@@ -1910,7 +1900,7 @@ function attachAllEventListeners() {
             });
         } catch (e) {
             console.error("Mermaid render error:", e);
-            el.innerHTML = `<p class="error-message">Error rendering diagram. Check Mermaid syntax.</p>`;
+            el.innerHTML = `< p class="error-message" > Error rendering diagram.Check Mermaid syntax.</p > `;
         }
     });
 }
@@ -2004,14 +1994,14 @@ function attachCardEventListeners() {
                 const chipText = chatChip.textContent || '';
                 if (cardId) {
                     const card = findCardGlobally(cardId);
-                    const inputEl = document.getElementById(`chat-input-${cardId}`) as HTMLTextAreaElement;
+                    const inputEl = document.getElementById(`chat - input - ${ cardId } `) as HTMLTextAreaElement;
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
                         inputEl.focus();
                         // Adjust textarea height
                         inputEl.style.height = 'auto';
-                        inputEl.style.height = `${inputEl.scrollHeight}px`;
+                        inputEl.style.height = `${ inputEl.scrollHeight } px`;
                     }
                 }
             }
@@ -2074,42 +2064,42 @@ async function handleProjectFormSubmit(event: Event) {
     let userInput = '';
     switch (projectInputMode) {
         case 'describe': userInput = currentProjectDescription; break;
-        case 'url': userInput = `URL: ${currentProjectUrl}`; break;
-        case 'code': userInput = `CODE:\n\`\`\`\n${currentProjectCode}\n\`\`\``; break;
-    }
+        case 'url': userInput = `URL: ${ currentProjectUrl } `; break;
+        case 'code': userInput = `CODE: \n\`\`\`\n${currentProjectCode}\n\`\`\``; break;
+}
 
-    if (!userInput.trim()) {
-        globalAiError = "Please describe your project before generating a plan.";
-        updateView();
-        return;
-    }
+if (!userInput.trim()) {
+    globalAiError = "Please describe your project before generating a plan.";
+    updateView();
+    return;
+}
 
-    isClarifying = true;
-    isClarificationLoading = true;
-    clarificationChatHistory = [{
+isClarifying = true;
+isClarificationLoading = true;
+clarificationChatHistory = [{
+    id: generateUniqueId('msg'),
+    sender: 'user',
+    text: `My project idea is: ${userInput}`,
+    timestamp: new Date()
+}];
+globalAiError = null;
+updateView(); // Show the clarification chat UI
+
+try {
+    const aiResponse = await callGeminiForClarification(userInput);
+    clarificationChatHistory.push({
         id: generateUniqueId('msg'),
-        sender: 'user',
-        text: `My project idea is: ${userInput}`,
+        sender: 'ai',
+        text: aiResponse,
         timestamp: new Date()
-    }];
-    globalAiError = null;
-    updateView(); // Show the clarification chat UI
-
-    try {
-        const aiResponse = await callGeminiForClarification(userInput);
-        clarificationChatHistory.push({
-            id: generateUniqueId('msg'),
-            sender: 'ai',
-            text: aiResponse,
-            timestamp: new Date()
-        });
-    } catch (error) {
-        console.error("Error during clarification:", error);
-        globalAiError = (error as Error).message;
-    } finally {
-        isClarificationLoading = false;
-        updateView();
-    }
+    });
+} catch (error) {
+    console.error("Error during clarification:", error);
+    globalAiError = (error as Error).message;
+} finally {
+    isClarificationLoading = false;
+    updateView();
+}
 }
 
 async function handleClarificationSubmit(event: Event) {

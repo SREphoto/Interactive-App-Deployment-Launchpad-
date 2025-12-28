@@ -1176,6 +1176,79 @@ function renderSandboxTool(): string {
     `;
 }
 
+function renderSandboxView(): string {
+    const sandboxToolState = toolStates["Live Code Sandbox"] || { input: '', output: '', isLoading: false, error: null, useProjectContext: false };
+
+    // Ensure we have a valid state object if toolStates was empty
+    if (!toolStates["Live Code Sandbox"]) {
+        toolStates["Live Code Sandbox"] = sandboxToolState;
+    }
+
+    return `
+        <div class="sandbox-full-page-container">
+            <div class="sandbox-ide-layout full-screen-mode">
+                <!-- 1. Chat Pane -->
+                <div class="ide-pane ide-chat-pane">
+                    <div class="ide-pane-header">
+                        <span>AI Architect</span>
+                        <button class="action-btn small" title="Clear History" onclick="alert('Clear history not implemented yet')">🗑️</button>
+                    </div>
+                    <div class="ide-chat-history">
+                        <div class="ide-chat-message ai">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">Hi! I'm your AI Architect. Describe your app, and I'll build it right here. You can ask for changes iteratively!</div>
+                        </div>
+                        <!-- Chat history would populate here -->
+                    </div>
+                    <div class="ide-chat-input-area">
+                        <form id="sandbox-we-chat-form">
+                            <textarea id="sandbox-ai-input" placeholder="e.g. 'Make the background dark blue', 'Add a contact form'..." ${sandboxToolState.isLoading ? 'disabled' : ''}></textarea>
+                            <button type="submit" class="action-btn" style="width: 100%; margin-top: 10px;" ${sandboxToolState.isLoading ? 'disabled' : ''}>
+                                ${sandboxToolState.isLoading ? '<span class="small-spinner"></span> Thinking...' : 'Generate Update'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 2. Editor/Preview Pane -->
+                <div class="ide-pane ide-workspace-pane">
+                     <div class="ide-workspace-header">
+                        <div class="ide-editor-tabs">
+                            <div class="editor-tab active" data-pane="preview">Preview</div>
+                            <div class="editor-tab" data-pane="code-html">index.html</div>
+                            <div class="editor-tab" data-pane="code-css">style.css</div>
+                            <div class="editor-tab" data-pane="code-js">script.js</div>
+                        </div>
+                        <div class="ide-actions">
+                             <button class="ide-action-btn success" id="ide-run-btn" title="Run Code">▶ Run</button>
+                             <button class="ide-action-btn" id="ide-download-btn" title="Download Project">⬇ Download</button>
+                             <button class="ide-action-btn" id="ide-deploy-btn" title="Deploy to Render">🚀 Deploy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="ide-workspace-content">
+                        <!-- Preview Mode -->
+                        <div id="workspace-preview" class="workspace-view active">
+                             <iframe id="sandbox-preview-frame" class="ide-preview-frame" title="App Preview"></iframe>
+                        </div>
+
+                        <!-- Code Modes -->
+                        <div id="workspace-code-html" class="workspace-view" style="display:none;">
+                            <textarea id="sandbox-html" class="ide-code-area" spellcheck="false">${sandboxState.html}</textarea>
+                        </div>
+                        <div id="workspace-code-css" class="workspace-view" style="display:none;">
+                            <textarea id="sandbox-css" class="ide-code-area" spellcheck="false">${sandboxState.css}</textarea>
+                        </div>
+                        <div id="workspace-code-js" class="workspace-view" style="display:none;">
+                            <textarea id="sandbox-js" class="ide-code-area" spellcheck="false">${sandboxState.js}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function renderFileManagerTool(): string {
     return `
         < div class="file-manager-container" >
@@ -1214,7 +1287,7 @@ function renderHeader(): string {
     </header>
         `;
 }
-}
+
 
 function renderChangelogModal(): string {
     if (!isChangelogOpen) return '';
@@ -1266,6 +1339,8 @@ function renderApp() {
         // For this change, we'll just call renderLaunchpad directly and let it handle its content.
     } else if (currentView === 'guide') {
         // mainContentHtml = renderGuideView(); // Placeholder
+    } else if (currentView === 'sandbox') {
+        mainContentHtml = renderSandboxView();
     } else if (currentView === 'tools') {
         // mainContentHtml = renderToolsView(); // Placeholder
     }
@@ -1278,7 +1353,7 @@ function renderApp() {
     appContainer.innerHTML = `
         ${renderHeader()}
         ${renderChangelogModal()}
-    <div id="main-content-wrapper"></div>
+    <div id="main-content-wrapper">${mainContentHtml}</div>
     `;
 
     // Re-attach event listeners after rendering
@@ -1297,19 +1372,21 @@ function renderToolCard(cardData: StaticGuideCardData) {
 
     if (cardData.title === "Live Code Sandbox") {
         return `
-        < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
+        <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
             <details open>
                 <summary>
                     <span class="card-title">${cardData.title}</span>
                 </summary>
                 <div class="card-content">
-                    ${cardData.content}
+                    <p>The Sandbox has moved to its own dedicated App Builder experience!</p>
                     <div class="tool-card-container">
-                        ${renderSandboxTool()}
+                         <button onclick="updateView('sandbox')" class="action-btn special-btn" style="width: 100%; padding: 15px; font-size: 1.1em;">
+                            🚀 Open App Builder
+                         </button>
                     </div>
                 </div>
             </details>
-            </section >
+            </section>
         `;
     }
 

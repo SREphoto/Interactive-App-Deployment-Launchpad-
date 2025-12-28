@@ -2858,3 +2858,9 @@ function init() {
 }
 
 init();
+
+// Expose functions to global scope for HTML onclick attributes
+(window as any).updateView = updateView;
+(window as any).resetApp = resetApp;
+(window as any).toggleChangelog = toggleChangelog;
+(window as any).closeChangelog = closeChangelog;

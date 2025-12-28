@@ -36,7 +36,8 @@ import {
     callGeminiForCloudPrompt,
     callGeminiForTool,
     callGeminiForGitHubTool,
-    callGeminiForSandbox
+    callGeminiForSandbox,
+    callGeminiForSandboxEdit
 } from './src/api';
 
 declare var hljs: any;
@@ -1839,9 +1840,7 @@ function attachAllEventListeners() {
         if (sandboxState.html || sandboxState.js) {
             handleRunSandbox();
         }
-        if (useCodeForPlanBtn) {
-            useCodeForPlanBtn.addEventListener('click', handleUseSandboxCodeForPlan);
-        }
+
     }
 
     document.querySelectorAll('.copy-code-btn').forEach(button => {

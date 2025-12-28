@@ -79,13 +79,40 @@ body {
     box-shadow: 0 0 5px currentColor;
 }
 
-.legend-swatch.type-step { background-color: var(--card-color-step); box-shadow: 0 0 5px var(--card-color-step); }
-.legend-swatch.type-decision { background-color: var(--card-color-decision); box-shadow: 0 0 5px var(--card-color-decision); }
-.legend-swatch.type-option-best { background-color: var(--card-color-option-best); box-shadow: 0 0 5px var(--card-color-option-best); }
-.legend-swatch.type-option-other { background-color: var(--card-color-option-other); box-shadow: 0 0 5px var(--card-color-option-other); }
-.legend-swatch.type-warning { background-color: var(--card-color-warning); box-shadow: 0 0 5px var(--card-color-warning); }
-.legend-swatch.completed { background-color: var(--card-color-completed); box-shadow: 0 0 5px var(--card-color-completed); }
-.legend-swatch.archived { background-color: var(--card-color-archived); box-shadow: 0 0 5px var(--card-color-archived); }
+.legend-swatch.type-step {
+    background-color: var(--card-color-step);
+    box-shadow: 0 0 5px var(--card-color-step);
+}
+
+.legend-swatch.type-decision {
+    background-color: var(--card-color-decision);
+    box-shadow: 0 0 5px var(--card-color-decision);
+}
+
+.legend-swatch.type-option-best {
+    background-color: var(--card-color-option-best);
+    box-shadow: 0 0 5px var(--card-color-option-best);
+}
+
+.legend-swatch.type-option-other {
+    background-color: var(--card-color-option-other);
+    box-shadow: 0 0 5px var(--card-color-option-other);
+}
+
+.legend-swatch.type-warning {
+    background-color: var(--card-color-warning);
+    box-shadow: 0 0 5px var(--card-color-warning);
+}
+
+.legend-swatch.completed {
+    background-color: var(--card-color-completed);
+    box-shadow: 0 0 5px var(--card-color-completed);
+}
+
+.legend-swatch.archived {
+    background-color: var(--card-color-archived);
+    box-shadow: 0 0 5px var(--card-color-archived);
+}
 
 
 /* Animated Background */
@@ -700,14 +727,18 @@ button:disabled::before {
 
 /* Detailed Card */
 .detailed-card {
-    border-left: 5px solid var(--card-color-step);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-1);
     padding: 0;
     overflow: hidden;
     animation: slideIn 0.5s ease-out;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .detailed-card:hover {
     transform: translateY(-4px);
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 212, 255, 0.1);
 }
 
 .detailed-card-header {
@@ -720,49 +751,81 @@ button:disabled::before {
     font-weight: 700;
     font-size: 1.2rem;
     transition: background 0.3s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .detailed-card-header:hover {
-    background: rgba(0, 212, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .card-content {
     padding: 35px;
-    border-top: 1px solid var(--color-border);
     display: block;
     line-height: 1.8;
 }
 
-.card-content p {
-    margin-bottom: 1em;
+/* Card Variants (Glow & Tint) */
+/* Step (Default) */
+.detailed-card.type-step {
+    border-color: var(--card-color-step);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card-color-step), transparent 95%), var(--color-surface-1));
 }
 
-.card-content ul,
-.card-content ol {
-    margin: 1em 0;
-    padding-left: 1.5em;
+.detailed-card.type-step:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
 }
 
-.card-content li {
-    margin-bottom: 0.5em;
-}
-
-/* Card Variants */
+/* Decision */
 .detailed-card.type-decision {
-    border-left-color: var(--card-color-decision);
+    border-color: var(--card-color-decision);
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.15);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card-color-decision), transparent 95%), var(--color-surface-1));
 }
 
+.detailed-card.type-decision:hover {
+    box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+}
+
+/* Option Best */
 .detailed-card.type-option-best {
-    border-left-color: var(--card-color-option-best);
+    border-color: var(--card-color-option-best);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card-color-option-best), transparent 95%), var(--color-surface-1));
 }
 
+.detailed-card.type-option-best:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+/* Option Other */
+.detailed-card.type-option-other {
+    border-color: var(--card-color-option-other);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.15);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card-color-option-other), transparent 95%), var(--color-surface-1));
+}
+
+.detailed-card.type-option-other:hover {
+    box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+}
+
+/* Warning */
 .detailed-card.type-warning {
-    border-left-color: var(--card-color-warning);
+    border-color: var(--card-color-warning);
+    box-shadow: 0 0 10px rgba(255, 51, 102, 0.15);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card-color-warning), transparent 95%), var(--color-surface-1));
+}
+
+.detailed-card.type-warning:hover {
+    box-shadow: 0 0 20px rgba(255, 51, 102, 0.3);
 }
 
 .detailed-card.completed-style {
-    opacity: 0.5;
-    filter: grayscale(0.6);
+    opacity: 0.6;
+    filter: grayscale(0.8);
+    border-color: var(--card-color-completed);
+    box-shadow: none;
+    background: var(--color-surface-2);
 }
 
 /* Checklists & Content */
@@ -1322,47 +1385,130 @@ a:hover {
     line-height: 1.6;
 }
 
-/* Sandbox */
+/* Sandbox (VS Code Style) */
 .sandbox-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 0;
     margin-top: 25px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1e1e1e;
+    /* VS Code Main Dark */
+    box-shadow: var(--shadow-lg);
 }
 
 .sandbox-editor {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    border-right: 1px solid #333;
 }
 
-.sandbox-editor label {
-    font-weight: 600;
-    color: var(--color-primary);
-    text-transform: uppercase;
+.editor-header {
+    background: #252526;
+    /* VS Code Tab Color */
+    padding: 0;
+    display: flex;
+    border-bottom: 1px solid #1e1e1e;
+}
+
+.editor-tab {
+    padding: 10px 20px;
+    font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
-    letter-spacing: 0.05em;
+    color: #969696;
+    background: #2d2d2d;
+    cursor: default;
+    border-right: 1px solid #1e1e1e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editor-tab.active {
+    background: #1e1e1e;
+    color: #ffffff;
+    border-top: 1px solid var(--color-primary);
 }
 
 .sandbox-editor textarea {
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.9rem;
-    min-height: 200px;
-    resize: vertical;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 500px;
+    resize: none;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    padding: 20px;
+    outline: none;
+    width: 100%;
+}
+
+.sandbox-editor textarea:focus {
+    box-shadow: none;
+    background: #1e1e1e;
 }
 
 .sandbox-preview {
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
+}
+
+.browser-bar {
+    background: #f0f0f0;
+    padding: 8px 15px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.browser-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.browser-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+}
+
+.browser-dot.red {
+    background: #ff5f56;
+}
+
+.browser-dot.yellow {
+    background: #ffbd2e;
+}
+
+.browser-dot.green {
+    background: #27c93f;
+}
+
+.browser-url {
     background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    min-height: 400px;
+    flex: 1;
+    border-radius: 4px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    color: #666;
+    border: 1px solid #ddd;
 }
 
 .sandbox-preview iframe {
     width: 100%;
     height: 100%;
     border: none;
-    min-height: 400px;
+    flex: 1;
 }
 
 /* Media Queries */

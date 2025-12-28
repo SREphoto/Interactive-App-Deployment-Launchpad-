@@ -1197,7 +1197,7 @@ function renderFileManagerTool(): string {
 
 function renderHeader(): string {
     return `
-        < header >
+        <header>
         <div class="header-content">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <h1>AI Studio Launch Assistant</h1>
@@ -1206,12 +1206,14 @@ function renderHeader(): string {
             <nav>
                 <a href="#" onclick="updateView('launchpad'); return false;" class="${currentView === 'launchpad' ? 'active' : ''}">Home</a>
                 <a href="#" onclick="updateView('guide'); return false;" class="${currentView === 'guide' ? 'active' : ''}">Guide</a>
+                <a href="#" onclick="updateView('sandbox'); return false;" class="${currentView === 'sandbox' ? 'active' : ''}">App Builder</a>
                 <a href="#" onclick="updateView('tools'); return false;" class="${currentView === 'tools' ? 'active' : ''}">Tools</a>
             </nav>
             <button class="action-btn header-action-btn" onclick="resetApp()">Reset App</button>
         </div>
-    </header >
+    </header>
         `;
+}
 }
 
 function renderChangelogModal(): string {

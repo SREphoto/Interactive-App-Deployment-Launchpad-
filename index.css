@@ -1727,5 +1727,172 @@ a:hover {
     position: absolute;
     left: 0;
     top: 0;
-}/ *   S a n d b o x   v 3   F u l l   P a g e   S t y l e s   * /  
- 
+}
+
+/* Sandbox Full Page Container */
+.sandbox-full-page-container {
+    position: fixed;
+    top: 73px;
+    /* Match header height */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-background);
+    z-index: 10;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.sandbox-ide-layout.full-screen-mode {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    height: 100%;
+    width: 100%;
+}
+
+/* Reusing ide-chat-pane but allowing full height override */
+.sandbox-ide-layout.full-screen-mode .ide-chat-pane {
+    height: 100%;
+    border-right: 1px solid var(--color-border);
+    border-radius: 0;
+    margin: 0;
+    border: none;
+    border-right: 1px solid var(--color-border);
+    background: rgba(10, 10, 15, 0.6);
+}
+
+.ide-workspace-pane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0e0e14;
+    /* Slightly darker key workspace bg */
+    overflow: hidden;
+}
+
+.ide-workspace-header {
+    height: 50px;
+    background: var(--color-surface-2);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+}
+
+.ide-workspace-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #1e1e1e;
+    /* Editor background color */
+}
+
+/* Workspace Views (Preview / Code) */
+.workspace-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+}
+
+.workspace-view.active {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Override existing preview frame styles for full view if needed */
+.ide-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #ffffff;
+    /* Web page default */
+}
+
+/* Editor Tabs in Workspace Header */
+.ide-workspace-header .ide-editor-tabs {
+    display: flex;
+    gap: 2px;
+    height: 100%;
+    align-items: flex-end;
+}
+
+.ide-workspace-header .editor-tab {
+    padding: 10px 20px;
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+    border-bottom: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.ide-workspace-header .editor-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-primary);
+}
+
+.ide-workspace-header .editor-tab.active {
+    background: #1e1e1e;
+    /* Match editor bg */
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+    border-bottom-color: #1e1e1e;
+    /* Hide bottom border */
+}
+
+/* Header Actions */
+.ide-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.ide-action-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.ide-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.ide-action-btn.success {
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.ide-action-btn.success:hover {
+    background: var(--color-success);
+    color: #000;
+}
+
+.ide-code-area {
+    width: 100%;
+    height: 100%;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    padding: 20px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    resize: none;
+    line-height: 1.5;
+    outline: none;
+}

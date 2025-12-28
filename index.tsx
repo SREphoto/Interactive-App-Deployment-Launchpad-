@@ -1125,10 +1125,6 @@ function renderSandboxTool(): string {
             <button class="ide-toggle-btn active" data-pane="editor" title="Toggle Code">Code</button>
             <button class="ide-toggle-btn active" data-pane="preview" title="Toggle Preview">Preview</button>
         </div>
-            <button class="ide-toggle-btn active" data-pane="chat" title="Toggle Chat">Chat</button>
-            <button class="ide-toggle-btn active" data-pane="editor" title="Toggle Code">Code</button>
-            <button class="ide-toggle-btn active" data-pane="preview" title="Toggle Preview">Preview</button>
-        </div >
 
         <div class="sandbox-ide-layout">
             <!-- 1. Chat Pane -->
@@ -1177,18 +1173,6 @@ function renderSandboxTool(): string {
             </div>
         </div>
     `;
-                </div >
-            </div >
-            <div class="sandbox-controls">
-                <button id="use-code-for-plan-btn" class="action-btn info-btn" title="Use the HTML, CSS, and JS below to generate a new plan in the AI Launchpad.">Use Code for Plan</button>
-                <button id="run-sandbox-btn" class="action-btn">Run</button>
-            </div>
-            <div class="sandbox-preview-container">
-                <label>Preview</label>
-                <iframe id="sandbox-preview" title="Live Code Preview" sandbox="allow-scripts"></iframe>
-            </div>
-        </div >
-        `;
 }
 
 function renderFileManagerTool(): string {
@@ -1289,8 +1273,8 @@ function renderApp() {
     // The actual content rendering will still be handled by renderLaunchpad, renderGuide, renderTools.
 
     appContainer.innerHTML = `
-        ${ renderHeader() }
-        ${ renderChangelogModal() }
+        ${renderHeader()}
+        ${renderChangelogModal()}
     <div id="main-content-wrapper"></div>
     `;
 
@@ -1354,14 +1338,14 @@ function renderToolCard(cardData: StaticGuideCardData) {
     let outputHtml = '';
     if (toolState.output) {
         if (cardData.title === "Mermaid Diagram Builder") {
-            outputHtml = `< div class="mermaid-diagram" id = "mermaid-output-container-${toolTitleId}" > ${ toolState.output }</div > `;
+            outputHtml = `< div class="mermaid-diagram" id = "mermaid-output-container-${toolTitleId}" > ${toolState.output}</div > `;
         } else {
             outputHtml = sanitizeHtml(marked.parse(toolState.output) as string);
         }
     }
 
     const isContextAware = cardData.title === "PRD Generator" || cardData.title === "MVP Feature Scoper";
-    const contextCheckboxId = `context - checkbox - ${ toolTitleId } `;
+    const contextCheckboxId = `context - checkbox - ${toolTitleId} `;
     const contextCheckboxHtml = isContextAware ? `
         < div class="tool-context-toggle" >
             <input type="checkbox" id="${contextCheckboxId}" data-tool-title="${cardData.title}" ${toolState.useProjectContext ? 'checked' : ''} ${roadmapSteps.length === 0 ? 'disabled' : ''}>
@@ -1370,7 +1354,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
             </div>
     ` : '';
 
-    const outputId = `tool - output - ${ toolTitleId } `;
+    const outputId = `tool - output - ${toolTitleId} `;
 
     return `
         < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
@@ -1410,7 +1394,7 @@ function updateView(newView?: AppView) {
     // Render the header and changelog modal first
     // Render the header (handled by static HTML) and changelog modal
     appContainer.innerHTML = `
-        ${ renderChangelogModal() }
+        ${renderChangelogModal()}
     <div id="main-content-area"></div>
     `;
 
@@ -1703,14 +1687,14 @@ function attachAllEventListeners() {
 
                 if (cardId) {
                     const card = findStaticCard(cardId);
-                    const inputEl = document.getElementById(`chat - input - ${ cardId } `) as HTMLTextAreaElement;
+                    const inputEl = document.getElementById(`chat - input - ${cardId} `) as HTMLTextAreaElement;
 
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
                         inputEl.focus();
                         inputEl.style.height = 'auto';
-                        inputEl.style.height = `${ inputEl.scrollHeight } px`;
+                        inputEl.style.height = `${inputEl.scrollHeight} px`;
                     }
                 }
             }
@@ -1994,14 +1978,14 @@ function attachCardEventListeners() {
                 const chipText = chatChip.textContent || '';
                 if (cardId) {
                     const card = findCardGlobally(cardId);
-                    const inputEl = document.getElementById(`chat - input - ${ cardId } `) as HTMLTextAreaElement;
+                    const inputEl = document.getElementById(`chat - input - ${cardId} `) as HTMLTextAreaElement;
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
                         inputEl.focus();
                         // Adjust textarea height
                         inputEl.style.height = 'auto';
-                        inputEl.style.height = `${ inputEl.scrollHeight } px`;
+                        inputEl.style.height = `${inputEl.scrollHeight} px`;
                     }
                 }
             }
@@ -2064,42 +2048,42 @@ async function handleProjectFormSubmit(event: Event) {
     let userInput = '';
     switch (projectInputMode) {
         case 'describe': userInput = currentProjectDescription; break;
-        case 'url': userInput = `URL: ${ currentProjectUrl } `; break;
+        case 'url': userInput = `URL: ${currentProjectUrl} `; break;
         case 'code': userInput = `CODE: \n\`\`\`\n${currentProjectCode}\n\`\`\``; break;
-}
+    }
 
-if (!userInput.trim()) {
-    globalAiError = "Please describe your project before generating a plan.";
-    updateView();
-    return;
-}
+    if (!userInput.trim()) {
+        globalAiError = "Please describe your project before generating a plan.";
+        updateView();
+        return;
+    }
 
-isClarifying = true;
-isClarificationLoading = true;
-clarificationChatHistory = [{
-    id: generateUniqueId('msg'),
-    sender: 'user',
-    text: `My project idea is: ${userInput}`,
-    timestamp: new Date()
-}];
-globalAiError = null;
-updateView(); // Show the clarification chat UI
-
-try {
-    const aiResponse = await callGeminiForClarification(userInput);
-    clarificationChatHistory.push({
+    isClarifying = true;
+    isClarificationLoading = true;
+    clarificationChatHistory = [{
         id: generateUniqueId('msg'),
-        sender: 'ai',
-        text: aiResponse,
+        sender: 'user',
+        text: `My project idea is: ${userInput}`,
         timestamp: new Date()
-    });
-} catch (error) {
-    console.error("Error during clarification:", error);
-    globalAiError = (error as Error).message;
-} finally {
-    isClarificationLoading = false;
-    updateView();
-}
+    }];
+    globalAiError = null;
+    updateView(); // Show the clarification chat UI
+
+    try {
+        const aiResponse = await callGeminiForClarification(userInput);
+        clarificationChatHistory.push({
+            id: generateUniqueId('msg'),
+            sender: 'ai',
+            text: aiResponse,
+            timestamp: new Date()
+        });
+    } catch (error) {
+        console.error("Error during clarification:", error);
+        globalAiError = (error as Error).message;
+    } finally {
+        isClarificationLoading = false;
+        updateView();
+    }
 }
 
 async function handleClarificationSubmit(event: Event) {

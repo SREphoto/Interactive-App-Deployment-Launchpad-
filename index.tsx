@@ -1402,7 +1402,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
 
     if (cardData.title === "Project File Manager") {
         return `
-        < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
+        <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
             <details>
                 <summary>
                     <span class="card-title">${cardData.title}</span>
@@ -1414,7 +1414,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
                     </div>
                 </div>
             </details>
-            </section >
+        </section>
         `;
     }
 
@@ -1437,17 +1437,17 @@ function renderToolCard(cardData: StaticGuideCardData) {
     const isContextAware = cardData.title === "PRD Generator" || cardData.title === "MVP Feature Scoper";
     const contextCheckboxId = `context - checkbox - ${toolTitleId} `;
     const contextCheckboxHtml = isContextAware ? `
-        < div class="tool-context-toggle" >
+        <div class="tool-context-toggle">
             <input type="checkbox" id="${contextCheckboxId}" data-tool-title="${cardData.title}" ${toolState.useProjectContext ? 'checked' : ''} ${roadmapSteps.length === 0 ? 'disabled' : ''}>
                 <label for="${contextCheckboxId}">Use Project Context from AI Launchpad</label>
                 ${roadmapSteps.length === 0 ? '<span class="context-disabled-note">(Generate a plan in AI Launchpad first)</span>' : ''}
             </div>
     ` : '';
 
-    const outputId = `tool - output - ${toolTitleId} `;
+    const outputId = `tool-output-${toolTitleId}`;
 
     return `
-        < section class="guide-card type-step" aria - labelledby="heading-${toolTitleId}" >
+        <section class="guide-card type-step" aria-labelledby="heading-${toolTitleId}">
             <details>
                 <summary>
                     <span class="card-title">${cardData.title}</span>
@@ -1471,7 +1471,7 @@ function renderToolCard(cardData: StaticGuideCardData) {
                     ` : ''}
                 </div>
             </details>
-        </section >
+        </section>
         `;
 }
 
@@ -1493,12 +1493,12 @@ function updateView(newView?: AppView) {
     // Then render the specific view content into the main content area
     if (currentView === 'launchpad') {
         mainContentArea.innerHTML = `
-        < div class="welcome-container" >
+        <div class="welcome-container">
             <div class="welcome-content">
                 <h1>Welcome to the AI Studio Launch Assistant</h1>
                 <p>Your comprehensive guide to launching and deploying AI-powered applications.</p>
             </div>
-            </div >
+            </div>
         <div class="launchpad-layout">
             <div class="launchpad-main-content">
                 <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
@@ -1614,7 +1614,7 @@ function updateView(newView?: AppView) {
     `;
     } else if (currentView === 'guide') {
         mainContentArea.innerHTML = `
-        < h2 class="guide-main-heading" > AI Application Deployment Guide</h2 >
+        <h2 class="guide-main-heading">AI Application Deployment Guide</h2>
             <div class="guide-version-info">
                 Version: ${GUIDE_VERSION} | Last Updated: ${GUIDE_LAST_UPDATED}
             </div>
@@ -1628,7 +1628,7 @@ function updateView(newView?: AppView) {
     `;
     } else { // Tools view
         mainContentArea.innerHTML = `
-        < h2 class="guide-main-heading" > Developer Tools</h2 >
+        <h2 class="guide-main-heading">Developer Tools</h2>
             <div id="tools-container">
                 ${toolData.map(card => renderToolCard(card)).join('')}
             </div>

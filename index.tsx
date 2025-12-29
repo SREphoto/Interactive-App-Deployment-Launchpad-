@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -126,32 +127,9 @@ const navTools = document.getElementById('nav-tools') as HTMLAnchorElement;
 // const headerContent = document.querySelector('.header-content'); // Removed as per instruction
 
 // --- Helper Functions ---
-function generateUniqueId(prefix: string = 'id'): string {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-}
+// --- Helper Functions ---
+// (Helper functions generateUniqueId, sanitizeHtml, stripHtml are imported from ./src/utils)
 
-function sanitizeHtml(htmlString: string): string {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlString;
-
-    Array.from(tempDiv.getElementsByTagName('script')).forEach(script => script.remove());
-    Array.from(tempDiv.querySelectorAll('*')).forEach(el => {
-        Array.from(el.attributes).forEach(attr => {
-            if (attr.name.toLowerCase().startsWith('on')) {
-                el.removeAttribute(attr.name);
-            }
-            if (attr.name.toLowerCase() === 'href' && attr.value.toLowerCase().startsWith('javascript:')) {
-                el.removeAttribute(attr.name);
-            }
-        });
-    });
-    return tempDiv.innerHTML;
-}
-function stripHtml(html: string): string {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    return tempDiv.textContent || tempDiv.innerText || "";
-}
 
 
 function findCardGlobally(cardId: string): DetailedCardData | undefined {
@@ -375,66 +353,84 @@ function loadStateFromLocalStorage() {
 
 // --- Rendering Functions ---
 
+
 function renderLaunchpad() {
     appContainer.innerHTML = `
-        <div class="welcome-container">
-            <div class="welcome-content">
-                <h1>Welcome to the AI Studio Launch Assistant</h1>
-                <p>Your comprehensive guide to launching and deploying AI-powered applications.</p>
+        <div class="app-wrapper">
+             <header>
+                <div class="header-branding">
+                    <h1>AI Launchpad <span style="opacity:0.5; font-weight:300; font-size: 0.8em">| Neo-Glass</span></h1>
+                </div>
+                <nav>
+                    <a href="#" id="nav-launchpad" class="active">Launchpad</a>
+                    <a href="#" id="nav-guide">Guide</a>
+                    <a href="#" id="nav-tools">Tools</a>
+                </nav>
+                <div class="header-actions">
+                    <button id="open-changelog-btn" class="action-btn header-action-btn" style="font-size: 0.8rem; padding: 8px 16px;">v1.0.1</button>
+                    <!-- <button class="action-btn header-action-btn">Settings</button> -->
+                </div>
+            </header>
+
+            <div class="welcome-container">
+                <div class="welcome-content">
+                    <h1>Launch Your Vision</h1>
+                    <p>The premium deployment suite for next-generation AI applications.</p>
+                </div>
             </div>
-        </div>
-        <div class="launchpad-layout">
-            <div class="launchpad-main-content">
-                <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
-                    <h2 id="project-input-heading">1. Describe Your AI Studio Project</h2>
-                     <div class="input-mode-tabs" role="tablist" aria-labelledby="project-input-heading">
-                        <button id="tab-describe" class="tab-btn ${projectInputMode === 'describe' ? 'active' : ''}" data-mode="describe" role="tab" aria-selected="${projectInputMode === 'describe'}" aria-controls="describe-content">Describe</button>
-                        <button id="tab-url" class="tab-btn ${projectInputMode === 'url' ? 'active' : ''}" data-mode="url" role="tab" aria-selected="${projectInputMode === 'url'}" aria-controls="url-content">From URL</button>
-                        <button id="tab-code" class="tab-btn ${projectInputMode === 'code' ? 'active' : ''}" data-mode="code" role="tab" aria-selected="${projectInputMode === 'code'}" aria-controls="code-content">From Code</button>
-                    </div>
-                    <form id="project-description-form">
-                        <div id="describe-content" style="display: ${projectInputMode === 'describe' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-describe">
-                            <label for="project-description" class="sr-only">Project Description</label>
-                            <textarea id="project-description" name="project-description" placeholder="E.g., 'A chatbot for customer service that uses a specific knowledge base about electronics', 'An image generator for creating fantasy art', 'A simple game where the AI is the opponent'..." ${projectInputMode === 'describe' ? 'required' : ''} rows="5" aria-required="${projectInputMode === 'describe'}">${currentProjectDescription}</textarea>
+
+            <div class="launchpad-layout">
+                <div class="launchpad-main-content">
+                    <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
+                        <h2 id="project-input-heading">1. Undefine The Possible</h2>
+                         <div class="input-mode-tabs" role="tablist" aria-labelledby="project-input-heading">
+                            <button id="tab-describe" class="tab-btn ${projectInputMode === 'describe' ? 'active' : ''}" data-mode="describe" role="tab" aria-selected="${projectInputMode === 'describe'}" aria-controls="describe-content">Describe</button>
+                            <button id="tab-url" class="tab-btn ${projectInputMode === 'url' ? 'active' : ''}" data-mode="url" role="tab" aria-selected="${projectInputMode === 'url'}" aria-controls="url-content">Input URL</button>
+                            <button id="tab-code" class="tab-btn ${projectInputMode === 'code' ? 'active' : ''}" data-mode="code" role="tab" aria-selected="${projectInputMode === 'code'}" aria-controls="code-content">Paste Code</button>
                         </div>
-                         <div id="url-content" style="display: ${projectInputMode === 'url' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-url">
-                            <label for="project-url" class="sr-only">Project Website URL</label>
-                            <input type="url" id="project-url" name="project-url" placeholder="https://example.com" value="${currentProjectUrl}" ${projectInputMode === 'url' ? 'required' : ''} aria-required="${projectInputMode === 'url'}" />
-                        </div>
-                        <div id="code-content" style="display: ${projectInputMode === 'code' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-code">
-                            <label for="project-code" class="sr-only">Paste Your Code</label>
-                            <textarea id="project-code" name="project-code" placeholder="Paste your relevant code here (e.g., main component, server file)..." ${projectInputMode === 'code' ? 'required' : ''} rows="10" aria-required="${projectInputMode === 'code'}">${currentProjectCode}</textarea>
-                        </div>
-                        <div class="form-actions">
-                             <button type="submit" id="generate-plan-btn">${isClarifying ? 'Start Over' : 'Analyze & Discuss'}</button>
-                            <label for="upload-plan-input" class="button-like-label action-btn" role="button" tabindex="0" aria-controls="upload-plan-input">Upload Plan (.json)</label>
-                            <input type="file" id="upload-plan-input" accept=".json" class="sr-only">
-                        </div>
-                    </form>
-                    <div id="global-ai-error-message" class="error-message" style="display: ${globalAiError ? 'block' : 'none'};" role="alert" aria-live="assertive">${globalAiError || ''}</div>
-                </section>
-                
-                <section id="clarification-section" class="launchpad-section" style="display: ${isClarifying ? 'block' : 'none'};" aria-labelledby="clarification-heading">
-                    <h2 id="clarification-heading">2. Confirm Project Scope</h2>
-                    <div class="clarification-chat-container">
-                        <div class="chat-history">
-                            ${(clarificationChatHistory || []).map(msg => `
-                                <div class="chat-message ${msg.sender}">
-                                    <strong>${msg.sender === 'user' ? 'You' : 'AI'}:</strong> ${sanitizeHtml(marked.parse(msg.text) as string)}
-                                </div>
-                            `).join('')}
-                        </div>
-                        ${isClarificationLoading ? '<div class="card-loading small-spinner">AI is thinking...</div>' : ''}
-                        <form id="clarification-chat-form" class="in-card-chat-form">
-                            <label for="clarification-chat-input" class="sr-only">Respond to AI</label>
-                            <textarea id="clarification-chat-input" class="chat-input" placeholder="Your response..." rows="2" aria-label="Respond to AI to clarify project details">${currentClarificationQuery}</textarea>
-                            <button type="submit" class="action-btn ask-ai-btn" ${isClarificationLoading ? 'disabled' : ''}>Send</button>
+                        <form id="project-description-form">
+                            <div id="describe-content" style="display: ${projectInputMode === 'describe' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-describe">
+                                <label for="project-description" class="sr-only">Project Description</label>
+                                <textarea id="project-description" name="project-description" placeholder="Describe your dream application..." ${projectInputMode === 'describe' ? 'required' : ''} rows="4" aria-required="${projectInputMode === 'describe'}">${currentProjectDescription}</textarea>
+                            </div>
+                             <div id="url-content" style="display: ${projectInputMode === 'url' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-url">
+                                <label for="project-url" class="sr-only">Project Website URL</label>
+                                <input type="url" id="project-url" name="project-url" placeholder="https://example.com" value="${currentProjectUrl}" ${projectInputMode === 'url' ? 'required' : ''} aria-required="${projectInputMode === 'url'}" />
+                            </div>
+                            <div id="code-content" style="display: ${projectInputMode === 'code' ? 'block' : 'none'};" role="tabpanel" aria-labelledby="tab-code">
+                                <label for="project-code" class="sr-only">Paste Your Code</label>
+                                <textarea id="project-code" name="project-code" placeholder="// Paste your core logic here..." ${projectInputMode === 'code' ? 'required' : ''} rows="8" aria-required="${projectInputMode === 'code'}">${currentProjectCode}</textarea>
+                            </div>
+                            <div class="form-actions">
+                                 <button type="submit" id="generate-plan-btn">${isClarifying ? 'Restart Session' : 'Initialize Launch Protocol'}</button>
+                                <label for="upload-plan-input" class="button-like-label action-btn" role="button" tabindex="0" aria-controls="upload-plan-input">Load Plan</label>
+                                <input type="file" id="upload-plan-input" accept=".json" class="sr-only">
+                            </div>
                         </form>
-                    </div>
-                    <div class="clarification-actions">
-                        <button id="generate-plan-from-convo-btn" class="action-btn" ${isClarificationLoading || clarificationChatHistory.length < 1 ? 'disabled' : ''}>Looks Good, Generate Plan</button>
-                    </div>
-                </section>
+                        <div id="global-ai-error-message" class="error-message" style="display: ${globalAiError ? 'block' : 'none'};" role="alert" aria-live="assertive">${globalAiError || ''}</div>
+                    </section>
+                    
+                    <section id="clarification-section" class="launchpad-section" style="display: ${isClarifying ? 'block' : 'none'};" aria-labelledby="clarification-heading">
+                        <h2 id="clarification-heading">2. Scope Refinement</h2>
+                        <div class="clarification-chat-container">
+                            <div class="chat-history">
+                                ${(clarificationChatHistory || []).map(msg => `
+                                    <div class="chat-message ${msg.sender}">
+                                        <strong>${msg.sender === 'user' ? 'You' : 'System'}:</strong> ${sanitizeHtml(marked.parse(msg.text) as string)}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${isClarificationLoading ? '<div class="card-loading small-spinner">System Processing...</div>' : ''}
+                            <form id="clarification-chat-form" class="in-card-chat-form">
+                                <label for="clarification-chat-input" class="sr-only">Respond to AI</label>
+                                <textarea id="clarification-chat-input" class="chat-input" placeholder="Enter parameters..." rows="2" aria-label="Respond to AI to clarify project details">${currentClarificationQuery}</textarea>
+                                <button type="submit" class="action-btn ask-ai-btn" ${isClarificationLoading ? 'disabled' : ''}>Transmit</button>
+                            </form>
+                        </div>
+                        <div class="clarification-actions">
+                            <button id="generate-plan-from-convo-btn" class="action-btn" ${isClarificationLoading || clarificationChatHistory.length < 1 ? 'disabled' : ''}>Confirm & Generate Roadmap</button>
+                        </div>
+                    </section>
 
                 <section class="launchpad-section" id="roadmap-section" aria-labelledby="roadmap-heading" style="display: ${!isClarifying && roadmapSteps.length > 0 ? 'block' : 'none'};">
                     <h2 id="roadmap-heading">${isClarifying ? '3.' : '2.'} Your AI-Generated Launch Roadmap</h2>
@@ -469,14 +465,21 @@ function renderLaunchpad() {
                 </section>
             </div>
             <aside class="launchpad-sidebar">
+                <section id="plan-actions-section" class="launchpad-section sidebar-section" aria-labelledby="plan-actions-heading">
+                    <h3 id="plan-actions-heading">Actions</h3>
+                    <div id="plan-actions-content" class="form-actions" style="flex-direction: column; align-items: stretch; margin-top: 10px;">
+                        <button id="download-plan-btn" class="action-btn" ${roadmapSteps.length === 0 ? 'disabled' : ''}>Download JSON Plan</button>
+                    </div>
+                </section>
+
                 <section id="roadmap-minimap-section" class="launchpad-section sidebar-section" aria-labelledby="roadmap-minimap-heading">
-                    <h3 id="roadmap-minimap-heading">Roadmap Minimap</h3>
+                    <h3 id="roadmap-minimap-heading">Maps</h3>
                     <div id="roadmap-minimap-content">
                         ${renderRoadmapMinimap()}
                     </div>
                 </section>
                 <section id="decisions-made-section" class="launchpad-section sidebar-section" aria-labelledby="decisions-made-heading">
-                    <h3 id="decisions-made-heading">Decisions Made</h3>
+                    <h3 id="decisions-made-heading">Decisions</h3>
                     <div id="decisions-made-content">
                         ${renderDecisionsMadeSidebar()}
                     </div>
@@ -487,14 +490,9 @@ function renderLaunchpad() {
                         ${renderColorLegend()}
                     </div>
                 </section>
-                 <section id="plan-actions-section" class="launchpad-section sidebar-section" aria-labelledby="plan-actions-heading">
-                    <h3 id="plan-actions-heading">Plan Actions</h3>
-                    <div id="plan-actions-content" class="form-actions" style="flex-direction: column; align-items: stretch;">
-                        <button id="download-plan-btn" class="action-btn" ${roadmapSteps.length === 0 ? 'disabled' : ''}>Download Plan (.json)</button>
-                    </div>
-                </section>
             </aside>
-        </div>
+        </div> <!-- End launchpad-layout -->
+    </div> <!-- End app-wrapper -->
     `;
     attachAllEventListeners();
 
@@ -697,12 +695,24 @@ function renderDetailedCard(card: DetailedCardData, context: 'active' | 'complet
         if (optionCards.length > 0) {
             decisionOptionsHtml = `
                 <div class="decision-options-container">
-                    <h4>Options for this decision:</h4>
-                    <div class="decision-options-minicards">
+                    <h4>Choose Your Path:</h4>
+                    <div class="decision-fork-container">
                         ${optionCards.map(optCard => {
-                const correspondingRoadmapStep = roadmapSteps.find(rs => rs.relatedCardId === optCard.id);
                 const isSelected = selectedOptionForDecision[card.id] === optCard.id;
-                return correspondingRoadmapStep ? renderMiniCard(correspondingRoadmapStep, true, isSelected) : '';
+                const isRecommended = optCard.type === 'option-best';
+                // Extract a brief summary from content if possible, or use default text
+                const stripContent = stripHtml(optCard.content).substring(0, 120) + '...';
+
+                return `
+                            <div class="decision-path-card ${isRecommended ? 'best' : 'other'} ${isSelected ? 'selected' : ''}" 
+                                 data-option-id="${optCard.id}"
+                                 role="button" tabindex="0">
+                                <span class="decision-path-tag">${isRecommended ? 'Recommended' : 'Alternative'}</span>
+                                <h5>${sanitizeHtml(optCard.title)}</h5>
+                                <p>${stripContent}</p>
+                                <button class="select-path-btn">${isSelected ? 'Path Selected' : 'Select Path'}</button>
+                            </div>
+                            `;
             }).join('')}
                     </div>
                 </div>`;
@@ -1652,7 +1662,12 @@ function updateView(newView?: AppView) {
     const projectUrlInput = document.getElementById('project-url') as HTMLInputElement;
     if (projectUrlInput && currentProjectUrl) {
         projectUrlInput.value = currentProjectUrl;
+    } else if (currentView === 'guide') {
+        renderGuide();
+    } else if (currentView === 'tools') {
+        renderToolsView();
     }
+
     const projectCodeTextarea = document.getElementById('project-code') as HTMLTextAreaElement;
     if (projectCodeTextarea && currentProjectCode) {
         projectCodeTextarea.value = currentProjectCode;
@@ -2021,9 +2036,17 @@ function attachCardEventListeners() {
 
             // Decision option mini-card selection
             const optionMiniCard = target.closest('.inner-option-minicard');
+            const decisionPathCard = target.closest('.decision-path-card');
+
             if (optionMiniCard) {
                 const optionCardId = optionMiniCard.getAttribute('data-scroll-to')?.replace('card-', '');
                 const decisionCardId = optionMiniCard.closest('.detailed-card')?.getAttribute('data-card-id');
+                if (optionCardId && decisionCardId) {
+                    handleOptionSelection(optionCardId, decisionCardId);
+                }
+            } else if (decisionPathCard) {
+                const optionCardId = decisionPathCard.getAttribute('data-option-id');
+                const decisionCardId = decisionPathCard.closest('.detailed-card')?.getAttribute('data-card-id');
                 if (optionCardId && decisionCardId) {
                     handleOptionSelection(optionCardId, decisionCardId);
                 }
@@ -2442,7 +2465,7 @@ async function handleGenerateCloudPrompt(cardId: string) {
     updateView();
 
     try {
-        const prompt = await callGeminiForCloudPrompt(card);
+        const prompt = await callGeminiForCloudPrompt(card, currentProjectDescription);
         card.generatedCloudPrompt = prompt;
     } catch (error) {
         console.error("Error generating cloud prompt:", error);
@@ -2849,6 +2872,17 @@ function parseAiResponseToCards(jsonString: string) {
 
 
 
+
+
+function resetApp() {
+    if (confirm("Are you sure you want to reset the app? This will clear all data.")) {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        window.location.reload();
+    }
+}
+
+// Expose resetApp to window so it can be called from HTML onclick
+(window as any).resetApp = resetApp;
 
 // --- Initialization ---
 function init() {

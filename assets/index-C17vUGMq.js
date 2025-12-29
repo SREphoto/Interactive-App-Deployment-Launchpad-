@@ -1066,7 +1066,7 @@ console.log("Sandbox JavaScript is running!");`},[...P,...L,...q].forEach(n=>{va
             </details>
             </section>
         `;if(t.title==="Project File Manager")return`
-        < section class="guide-card type-step" aria - labelledby="heading-${e}" >
+        <section class="guide-card type-step" aria-labelledby="heading-${e}">
             <details>
                 <summary>
                     <span class="card-title">${t.title}</span>
@@ -1078,15 +1078,15 @@ console.log("Sandbox JavaScript is running!");`},[...P,...L,...q].forEach(n=>{va
                     </div>
                 </div>
             </details>
-            </section >
+        </section>
         `;const n=!["Live Code Sandbox","Project File Manager","GitHub Assistant"].includes(t.title);H[t.title]||(H[t.title]={input:"",output:"",isLoading:!1,error:null,useProjectContext:!0});const o=H[t.title];let i="";o.output&&(t.title==="Mermaid Diagram Builder"?i=`< div class="mermaid-diagram" id = "mermaid-output-container-${e}" > ${o.output}</div > `:i=B(x.parse(o.output)));const r=t.title==="PRD Generator"||t.title==="MVP Feature Scoper",a=`context - checkbox - ${e} `,u=r?`
-        < div class="tool-context-toggle" >
+        <div class="tool-context-toggle">
             <input type="checkbox" id="${a}" data-tool-title="${t.title}" ${o.useProjectContext?"checked":""} ${b.length===0?"disabled":""}>
                 <label for="${a}">Use Project Context from AI Launchpad</label>
                 ${b.length===0?'<span class="context-disabled-note">(Generate a plan in AI Launchpad first)</span>':""}
             </div>
-    `:"",c=`tool - output - ${e} `;return`
-        < section class="guide-card type-step" aria - labelledby="heading-${e}" >
+    `:"",c=`tool-output-${e}`;return`
+        <section class="guide-card type-step" aria-labelledby="heading-${e}">
             <details>
                 <summary>
                     <span class="card-title">${t.title}</span>
@@ -1110,17 +1110,17 @@ console.log("Sandbox JavaScript is running!");`},[...P,...L,...q].forEach(n=>{va
                     `:""}
                 </div>
             </details>
-        </section >
+        </section>
         `}function k(t){t&&(ee=t),Jt.innerHTML=`
         ${lf()}
     <div id="main-content-area"></div>
     `;const e=document.getElementById("main-content-area");ee==="launchpad"?e.innerHTML=`
-        < div class="welcome-container" >
+        <div class="welcome-container">
             <div class="welcome-content">
                 <h1>Welcome to the AI Studio Launch Assistant</h1>
                 <p>Your comprehensive guide to launching and deploying AI-powered applications.</p>
             </div>
-            </div >
+            </div>
         <div class="launchpad-layout">
             <div class="launchpad-main-content">
                 <section class="launchpad-section" id="project-input-section" aria-labelledby="project-input-heading">
@@ -1234,7 +1234,7 @@ console.log("Sandbox JavaScript is running!");`},[...P,...L,...q].forEach(n=>{va
             </aside>
         </div>
     `:ee==="guide"?e.innerHTML=`
-        < h2 class="guide-main-heading" > AI Application Deployment Guide</h2 >
+        <h2 class="guide-main-heading">AI Application Deployment Guide</h2>
             <div class="guide-version-info">
                 Version: ${mi} | Last Updated: ${yi}
             </div>
@@ -1246,7 +1246,7 @@ console.log("Sandbox JavaScript is running!");`},[...P,...L,...q].forEach(n=>{va
                 ${Ro.length>0?Ro.map(r=>zt(r)).join(""):'<p id="no-guide-results">No guide sections found for your search.</p>'}
             </div>
     `:e.innerHTML=`
-        < h2 class="guide-main-heading" > Developer Tools</h2 >
+        <h2 class="guide-main-heading">Developer Tools</h2>
             <div id="tools-container">
                 ${Ci.map(r=>Si(r)).join("")}
             </div>

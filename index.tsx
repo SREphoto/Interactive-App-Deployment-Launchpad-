@@ -1428,14 +1428,14 @@ function renderToolCard(cardData: StaticGuideCardData) {
     let outputHtml = '';
     if (toolState.output) {
         if (cardData.title === "Mermaid Diagram Builder") {
-            outputHtml = `< div class="mermaid-diagram" id = "mermaid-output-container-${toolTitleId}" > ${toolState.output}</div > `;
+            outputHtml = `<div class="mermaid-diagram" id="mermaid-output-container-${toolTitleId}">${toolState.output}</div>`;
         } else {
             outputHtml = sanitizeHtml(marked.parse(toolState.output) as string);
         }
     }
 
     const isContextAware = cardData.title === "PRD Generator" || cardData.title === "MVP Feature Scoper";
-    const contextCheckboxId = `context - checkbox - ${toolTitleId} `;
+    const contextCheckboxId = `context-checkbox-${toolTitleId}`;
     const contextCheckboxHtml = isContextAware ? `
         <div class="tool-context-toggle">
             <input type="checkbox" id="${contextCheckboxId}" data-tool-title="${cardData.title}" ${toolState.useProjectContext ? 'checked' : ''} ${roadmapSteps.length === 0 ? 'disabled' : ''}>
@@ -1782,14 +1782,14 @@ function attachAllEventListeners() {
 
                 if (cardId) {
                     const card = findStaticCard(cardId);
-                    const inputEl = document.getElementById(`chat - input - ${cardId} `) as HTMLTextAreaElement;
+                    const inputEl = document.getElementById(`chat-input-${cardId}`) as HTMLTextAreaElement;
 
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
                         inputEl.focus();
                         inputEl.style.height = 'auto';
-                        inputEl.style.height = `${inputEl.scrollHeight} px`;
+                        inputEl.style.height = `${inputEl.scrollHeight}px`;
                     }
                 }
             }
@@ -2079,14 +2079,14 @@ function attachCardEventListeners() {
                 const chipText = chatChip.textContent || '';
                 if (cardId) {
                     const card = findCardGlobally(cardId);
-                    const inputEl = document.getElementById(`chat - input - ${cardId} `) as HTMLTextAreaElement;
+                    const inputEl = document.getElementById(`chat-input-${cardId}`) as HTMLTextAreaElement;
                     if (card && inputEl) {
                         card.currentChatQuery = chipText;
                         inputEl.value = chipText;
                         inputEl.focus();
                         // Adjust textarea height
                         inputEl.style.height = 'auto';
-                        inputEl.style.height = `${inputEl.scrollHeight} px`;
+                        inputEl.style.height = `${inputEl.scrollHeight}px`;
                     }
                 }
             }
